@@ -1,0 +1,22 @@
+nguồn,bước,số dòng
+Shopee,file gốc,2843
+Shopee,bỏ rác giao diện 'Tổng quan…',2723
+Shopee,khử trùng (sau khi bỏ nhãn mục),2556
+Shopee,bỏ review < 2 từ,2548
+Aug,file gốc,1347
+Aug,khử trùng,1347
+Aug,bỏ review < 2 từ,1347
+Aug,giữ câu có sao và nhãn khớp (bỏ 3 sao),1205
+A-train,file gốc,7785
+A-train,bỏ review không có cụm nào,7625
+A-train,bỏ review hòa cảm xúc,7347
+A-dev,file gốc,1112
+A-dev,bỏ review không có cụm nào,1086
+A-dev,bỏ review hòa cảm xúc,1046
+A-test,file gốc,2225
+A-test,bỏ review không có cụm nào,2186
+A-test,bỏ review hòa cảm xúc,2120
+A-train,bỏ câu trùng với dev/test,7344
+Shopee,train sau khi bỏ trùng với kho vàng,1794
+Aug,sau khi bỏ trùng với kho vàng,1205
+A-train,sau khi bỏ trùng với kho vàng,7344
