@@ -10,7 +10,7 @@ TEENCODE = {"k": "không", "ko": "không", "kh": "không", "hok": "không", "khu
             "vs": "với", "nx": "nữa", "ship": "giao hàng", "shop": "cửa hàng",
             "nma": "nhưng mà", "qa": "quá", "qá": "quá", "wa": "quá", "lun": "luôn",
             "j": "gì", "z": "vậy", "v": "vậy", "r": "rồi", "ròi": "rồi", "rùi": "rồi",
-            "bth": "bình thường",   # không map "bt": vừa là "bình thường" vừa là "biết" "bthg": "bình thường",
+            "bth": "bình thường", "bthg": "bình thường",   # không map "bt": vừa là "bình thường" vừa là "biết"
             "cx": "cũng", "cg": "cũng", "ns": "nói", "nt": "nhắn tin", "ib": "nhắn tin",
             "trc": "trước", "đt": "điện thoại", "dt": "điện thoại", "tl": "trả lời",
             "fb": "phản hồi", "feedback": "phản hồi", "rep": "trả lời", "auth": "chính hãng",

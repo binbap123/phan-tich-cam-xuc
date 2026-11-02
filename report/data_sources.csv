@@ -1,0 +1,4 @@
+﻿Nguồn,Số quan sát,Miền,Nhãn
+A: ViSD4SA (train/dev/test),10510,Điện thoại,Cụm từ → câu
+B: Shopee (sau làm sạch),2548,"32 sản phẩm, 9 ngành hàng",Sao (yếu) + 300 câu tay
+Aug: không dấu (đã lọc),1205,"Mỹ phẩm, đa ngành",2 lớp

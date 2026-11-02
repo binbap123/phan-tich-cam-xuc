@@ -1,0 +1,16 @@
+﻿Nguồn,Biến,Kiểu,Mô tả,Ý nghĩa kinh doanh
+Shopee,id,chuỗi,Mã review do nhóm tạo (shp_XXXX),"Truy vết review, ẩn danh người mua"
+Shopee,product,chuỗi,Tên sản phẩm (32 sản phẩm),Đơn vị để so sánh chất lượng giữa các mặt hàng
+Shopee,category,chuỗi,"Ngành hàng, nhóm tự gán (9 ngành)",So sánh mức hài lòng giữa ngành hàng
+Shopee,rating,số nguyên 1–5,Số sao người mua chấm,Mức hài lòng tổng quát; là nhãn yếu
+Shopee,text,chuỗi,Nội dung review gốc,Nguồn insight về lý do hài lòng/không hài lòng
+Shopee,text_clean,chuỗi,"Review đã bỏ nhãn mục template, gộp khoảng trắng",Đầu vào cho phân tích
+Shopee,weak_label,pos/neu/neg,"Nhãn suy từ sao: 1–2 neg, 3 neu, 4–5 pos",Nhãn huấn luyện rẻ nhưng nhiễu
+ViSD4SA,text,chuỗi,Review điện thoại,Dữ liệu huấn luyện có nhãn chuẩn
+ViSD4SA,labels,"danh sách [start, end, KHÍA_CẠNH#CẢM_XÚC]","Nhãn theo cụm từ, 10 khía cạnh",Cho biết khách khen/chê phần nào
+ViSD4SA,label,pos/neu/neg,"Nhãn cả câu, nhóm tự gộp từ nhãn cụm",Mục tiêu phân loại
+ViSD4SA,"chat_luong, gia_ca, dich_vu",pos/neu/neg/trống,Cảm xúc theo 3 nhóm khía cạnh,Huấn luyện ABSA
+Aug,text,chuỗi,Review không dấu,Mô phỏng người dùng gõ không dấu
+Aug,"rating, label","1–5, positive/negative",Sao và nhãn 2 lớp,Chỉ dùng để huấn luyện
+Tập vàng,sentiment,pos/neu/neg,Nhãn tay theo labeling/guideline.md,Thước đo chất lượng mô hình thật
+Tập vàng,giao_hang … dich_vu,pos/neu/neg/none,Nhãn tay theo 4 khía cạnh,Đánh giá ABSA

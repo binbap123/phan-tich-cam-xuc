@@ -1,0 +1,5 @@
+model,best_params,cv_f1_mean,cv_f1_std
+BoW+NB (baseline),mặc định,0.574,0.085
+TF-IDF+LR,"{'C': 3, 'min_df': 1, 'ngram_range': (1, 2)}",0.628,0.108
+TF-IDF+LinearSVC,"{'C': 0.3, 'min_df': 2, 'ngram_range': (1, 2)}",0.626,0.101
+TF-IDF+đặc trưng+LR,C=10,0.603,0.122

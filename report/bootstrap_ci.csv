@@ -1,0 +1,5 @@
+﻿Mô hình,F1-macro,CI 2.5%,CI 97.5%
+BoW+NB (baseline),0.563,0.542,0.584
+TF-IDF+LR,0.612,0.568,0.655
+TF-IDF+LinearSVC,0.617,0.576,0.662
+TF-IDF+đặc trưng+LR,0.597,0.557,0.636

@@ -1,0 +1,5 @@
+﻿Mô hình,Accuracy,Precision (macro),Recall (macro),F1-macro,Recall neg,ROC-AUC (OvR),PR-AUC (macro),F1 ViSD test
+BoW+NB (baseline),0.861,0.543,0.585,0.563,0.794,0.814,0.615,0.595
+TF-IDF+LR,0.843,0.609,0.615,0.612,0.75,0.904,0.65,0.713
+TF-IDF+LinearSVC,0.855,0.619,0.617,0.617,0.762,0.911,0.658,0.708
+TF-IDF+đặc trưng+LR,0.839,0.598,0.597,0.597,0.731,0.902,0.649,0.707

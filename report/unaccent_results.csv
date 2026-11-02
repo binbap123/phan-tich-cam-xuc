@@ -1,0 +1,3 @@
+Train,ViSD test có dấu,ViSD test không dấu,Vàng có dấu,Vàng không dấu
+A+B,0.713,0.481,0.612,0.458
+A+B+Aug,0.717,0.457,0.618,0.527

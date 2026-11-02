@@ -1,0 +1,4 @@
+weak_label,n_words,n_negation,n_contrast,n_exclaim,upper_ratio,accent_ratio
+neg,31.608,1.544,0.677,0.102,0.031,0.279
+neu,31.95,1.244,0.773,0.041,0.031,0.281
+pos,23.05,0.387,0.24,0.059,0.028,0.262
