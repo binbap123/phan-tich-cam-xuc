@@ -1,362 +1,326 @@
-Set-Content .gitignore ".venv/`n.ipynb_checkpoints/`n__pycache__/" -Encoding utf8# Hướng dẫn từng bước: Đồ án Phân tích Cảm xúc (bản điều chỉnh theo dataset đã có)
+# Hướng dẫn từng bước: Đồ án Phân tích Cảm xúc (bản theo rubric cuối khóa 23/10)
 
-Cập nhật 22/10/2026. Hạn chót vẫn là 11/11, mục tiêu có bản nộp hoàn chỉnh vào 9/11.
+Cập nhật 02/11/2026. **Hạn chót: 23:59 ngày 11/11/2026.** Mục tiêu có file `.zip` hoàn chỉnh vào tối 10/11.
 
-Mỗi ngày trong lộ trình đều có 5 phần: **Học gì** (khái niệm cần hiểu), **Làm gì** (code, có mẫu), **Tự kiểm tra** (câu hỏi bạn phải trả lời được trước khi qua ngày sau), **Đầu ra**, và **Ghi vào báo cáo**. Đừng copy code cho chạy là xong. Gõ lại, in kết quả trung gian ra và giải thích được từng dòng thì mới học được, mà lúc bảo vệ giảng viên cũng sẽ hỏi đúng những chỗ đó.
+Tài liệu gốc: `huong_dan_tieu_luan_va_rubric_cuoi_khoa.pdf` (Ban Giảng huấn, 23/10/2026). Khi file này và PDF khác nhau thì **làm theo PDF**.
+
+Mỗi ngày trong lộ trình có 5 phần: **Học gì**, **Làm gì**, **Tự kiểm tra**, **Đầu ra**, **Ghi vào phần nào** của báo cáo. Gõ lại code và giải thích được từng dòng, đừng chỉ copy cho chạy.
 
 ---
 
-## 0. Những gì thay đổi so với kế hoạch cũ
+## 0. Những gì thay đổi so với kế hoạch 22/10
 
-Kế hoạch cũ giả định bạn phải tự cào Tiki và tải thêm bộ B (AIVIVN). Giờ bạn đã có sẵn hai file, nên vai trò các nguồn dữ liệu đổi như sau:
-
-| Nguồn | Nội dung thực tế | Vai trò mới |
+| Kế hoạch cũ | Rubric mới | Việc phải làm |
 |---|---|---|
-| **A: UIT-ViSD4SA** (`ViSD4SA/`, đã tải) | 11.122 review điện thoại (train 7.785 / dev 1.112 / test 2.225), nhãn theo cụm từ, 10 khía cạnh × 3 cảm xúc | Huấn luyện 3 lớp và ABSA. Với tập vàng Shopee, đây là **ngoài miền thật** (điện thoại → đa ngành hàng) |
-| **B: `data/final_train_dataset.csv`** | 2.843 review Shopee có dấu, 32 sản phẩm, sao 1–5. Sau làm sạch còn **2.548** | **Thay cho bộ B và dữ liệu cào.** Chia theo sản phẩm: 22 sản phẩm (~1.850 review) để huấn luyện với nhãn yếu từ số sao; 10 sản phẩm (~700 review) để lấy **tập vàng** gán nhãn tay. Dùng toàn bộ cho phân tích kinh doanh |
-| **Aug: `data/aug_unaccented_reviews.jsonl`** | 1.348 review **không dấu**, nhãn 2 lớp, nhiều câu có vẻ do AI sinh | **Chỉ đưa vào tập huấn luyện**, không bao giờ vào test. Dùng cho thí nghiệm "mô hình có chịu được văn bản không dấu không" |
+| Báo cáo 7 chương, ≤ 30 trang | **6 phần**, **≤ 45 trang** (không tính code) | Viết theo cấu trúc ở mục 3 |
+| Không quy định công cụ | **Bắt buộc Quarto `.qmd` → PDF** (XeLaTeX) | Cài TinyTeX, dùng YAML ở mục 2 |
+| Có slide, bảo vệ | **Không thuyết trình** | Bỏ slide; dồn thời gian cho demo |
+| Dashboard chụp màn hình | Demo **online hoặc video 2–3 phút**, có **What-if** và **khuyến nghị hành động** | Ngày 7/11 |
+| +10 điểm tự cào | Thưởng **+0,5–1,0** nếu dữ liệu thật của doanh nghiệp **hoặc người dùng thật thử nghiệm** | Nhờ 3–5 người dùng thử dashboard. Bỏ phương án cào bổ sung |
+| Chương 1 giới thiệu chung | **Design Thinking:** Persona, Empathy Map, SMART, **ROI** | Ngày 9/11 viết, số liệu chi phí lấy từ ngày 5/11 |
+| Tuning "thử 1–2 learning rate" | **≥ 3 thuật toán nâng cao, K-Fold CV, GridSearch/Optuna, Learning Curve** (phần III, 25%, nặng nhất) | Ngày 3–4/11 |
+| Chỉ F1-macro, confusion matrix | Thêm **ROC-AUC, PR-AUC**, chi phí sai loại 1/loại 2, **SHAP**, **đạo đức AI** | Ngày 5/11 |
+| Không có | **Feature engineering 2–3 đặc trưng mới**, từ điển dữ liệu, skewness, tương quan | Ngày 2/11 |
+| Không có | Mục **Tuyên bố sử dụng AI** (bạn có dùng Claude); Turnitin ≤ 20% | Ghi ở Lời cảm ơn |
+| Làm cá nhân | Đề cho **nhóm 3–4 người**; cá nhân cần giảng viên đồng ý | **Hỏi giảng viên ngay** nếu chưa hỏi |
 
-Hệ quả:
-- **Bỏ 2 ngày cào dữ liệu** (23–24/10 cũ). Thời gian dư dùng để học kỹ tiền xử lý và gán nhãn tập vàng chậm mà chắc.
-- **Không cần AIVIVN.** Thí nghiệm "huấn luyện trên A, B, A+B" vẫn giữ nguyên, B giờ là phần train của Shopee.
-- **Điểm +10 tự cào:** nếu file CSV do bạn (hoặc nhóm) tự cào, mô tả cách cào trong Chương 3 là được tính. Nếu tải của người khác, hỏi giảng viên ngay hôm nay. Nếu giảng viên không chấp nhận, xem mục "Phương án cào bổ sung" ở cuối file.
-- **Khía cạnh "giao hàng" không có trong ViSD4SA.** Khía cạnh này sẽ lấy từ từ điển khía cạnh chạy trên dữ liệu Shopee, nơi có rất nhiều câu "giao hàng nhanh, đóng gói cẩn thận". Đây là một điểm hay để viết trong báo cáo.
+### Trọng số chấm điểm (thang 10)
 
-### Những con số đã kiểm tra trên dữ liệu của bạn
+| Trụ cột | Trọng số | Phần báo cáo |
+|---|---|---|
+| I. Bài toán kinh doanh & Design Thinking | 15% | P1 |
+| II. EDA & tiền xử lý | 20% | P3 |
+| III. Mô hình hóa, tối ưu, chống quá khớp | **25%** | P4 |
+| IV. Đánh giá, XAI, đạo đức AI | 15% | P5 |
+| V. Sản phẩm mẫu (Web App / video) | 15% | P6 + `demo/` |
+| VI. Trình bày & chất lượng mã nguồn | 10% | Toàn bài + notebook |
+| Thưởng | +0,5–1,0 | Người dùng thật thử nghiệm |
 
-- CSV có 120 dòng là rác giao diện ("Tổng quan 4.9 (3034 đánh giá)… Trợ lý AI tổng hợp…"), 275 dòng trùng, và 93 review cực ngắn.
-- Sau khi làm sạch còn 2.548 review: pos 1.709 (67%), neg 597, neu 242 (chỉ 9,5%). Lớp trung lập rất ít, nên **bắt buộc báo F1-macro**.
-- Phân bố sản phẩm lệch: riêng khăn ướt Bobby đã có 518 review. Vì vậy phải **chia theo sản phẩm**, không chia ngẫu nhiên từng dòng.
-- Baseline nhanh mình chạy thử (train 22 sản phẩm, test 10 sản phẩm còn lại, nhãn từ sao): BoW+LR đạt F1-macro 0,667, TF-IDF+LR 0,667, TF-IDF+NB 0,489. Đây là mốc để bạn so khi tự làm.
-- JSONL: giữ được 1.206 câu có sao và nhãn khớp nhau (sao 1–2 + negative, sao 4–5 + positive). Bỏ các câu 3 sao vì nhãn ở đó lộn xộn: 118 cái gán negative, 13 cái gán positive.
+P2 (CRISP-DM, thuật toán) không có dòng riêng trong rubric nhưng có trong cấu trúc bắt buộc; viết gọn 2–3 trang.
 
-### Kết quả kiểm tra ViSD4SA (22/10)
+### Tiến độ hiện tại (02/11)
 
-- **Định dạng:** mỗi dòng có dạng `{"text": ..., "labels": [[start, end, "ASPECT#POLARITY"], ...]}`, trung bình 3,2 cụm mỗi review.
-- **Không trùng với Shopee:** không câu nào trùng. Giữa train và test chỉ có 2 câu trùng, giữa train và dev 1 câu, xóa đi là xong.
-- **Khía cạnh (tập train):** GENERAL 5.637, PERFORMANCE 4.799, BATTERY 3.943, FEATURES 2.788, CAMERA 2.182, SER&ACC 1.875, DESIGN 1.497, PRICE 995, SCREEN 962, STORAGE 93.
-  - Nhóm Chất lượng rất dày.
-  - Giá cả (~1.000 cụm) và Dịch vụ (~1.900 cụm) đủ để học.
-  - **Giao hàng gần như không có:** chỉ 51 review nhắc tới.
-- **Cụm hỏng:** 122 cụm có `end` vượt quá độ dài câu, nhiều nhất 25 ký tự. Cách xử lý là cắt `end = min(end, len(text))`.
-- **Văn bản chưa chuẩn NFC:** 227 câu. **Phải cắt cụm theo vị trí TRƯỚC khi chuẩn hóa NFC**, vì chuẩn hóa làm đổi độ dài chuỗi nên vị trí sẽ lệch.
-- **Nhãn cả câu** theo quy tắc ở ngày 24/10 (tính trên cả 3 tập):
+- **Đã xong trước đó:** EDA, làm sạch, chia theo sản phẩm, `src/preprocess.py`, guideline gán nhãn, baseline (`notebook/01`–`04`).
+- **Chưa xong:** tập vàng (`labeling/gold_500_to_label.csv` chưa có nhãn nào). Tập vàng giảm còn **300 câu cảm xúc + 150 câu khía cạnh**; ABSA chỉ giữ cách từ điển.
 
-  | Nhãn | Số câu | Tỉ lệ |
-  |---|---|---|
-  | pos | 6.638 | 61% |
-  | neg | 3.456 | 32% |
-  | neu | 419 | **chỉ 3,8%** |
-  | hòa (bỏ đi) | 384 | |
-  | không có nhãn (bỏ đi) | 225 | |
+### Đã chuẩn bị sẵn ngày 02/11 (Claude làm, bạn phải đọc hiểu)
 
-  Khoảng 38% review có cả khen lẫn chê, nên quy tắc gộp nhãn rất quan trọng và phải ghi trong báo cáo.
+Code cho các ngày 2/11 → 7/11 đã viết và chạy được. **Mọi notebook tự đọc nhãn tay** từ `labeling/gold_500.csv`, hoặc thẳng từ `gold_500_to_label.csv` nếu có ≥ 50 câu đã gán. Khi chưa đủ, chúng TẠM chấm bằng nhãn sao, nên **mọi con số "tập vàng" hiện tại chưa dùng được cho báo cáo.**
 
-- **Thí nghiệm nhanh** (TF-IDF+LR, chưa tách từ; nhãn Shopee lấy từ sao):
+| File | Nội dung | Phần báo cáo |
+|---|---|---|
+| `src/data.py` | Hàm nạp dữ liệu và tập vàng dùng chung | |
+| `src/features.py` | 6 đặc trưng mới (phủ định, từ đối lập, độ dài, "!", chữ HOA, tỉ lệ có dấu) | P3.3 |
+| `src/aspects.py` | ABSA từ điển: tách mệnh đề → khía cạnh → cảm xúc | P5 |
+| `notebook/05_eda_bosung` | Từ điển dữ liệu, skewness, cảm xúc theo ngành, tương quan Spearman, word cloud | P3.1–3.2 |
+| `notebook/06_tuning` | GroupKFold, GridSearch (LR, LinearSVC), TF-IDF + đặc trưng, GroupKFold vs KFold, learning curve, lưu `models/` | P4 |
+| `notebook/07_word2vec_tien_xu_ly` | Word2Vec + LR, 4 mức tiền xử lý, thí nghiệm không dấu | P3.3, P4, P5 |
+| `notebook/08_phobert_colab` | **Chạy trên Colab**, xuất xác suất về `report/phobert/` | P4 |
+| `notebook/09_danh_gia_xai` | Bảng chỉ số đầy đủ, bootstrap, PR curve, ma trận nhầm lẫn, **chi phí + ROI**, HITL, fairness, SHAP, xuất câu sai | P1.4, P5 |
+| `notebook/10_absa_kinh_doanh` | Đánh giá ABSA, chạy trên 2.548 review, heatmap ngành × khía cạnh, lời chê ẩn, ứng viên top 3 vấn đề | P5, P6 |
+| `app/dashboard.py` | Streamlit 3 tab: phân tích review + khuyến nghị, **What-if** (sửa câu, ngưỡng/chi phí), tổng quan | P6, demo |
+| `report/bao_cao.qmd` + `references.bib` | Khung báo cáo 6 phần, đã gắn sẵn hình và bảng; chỗ `[VIẾT]` là phần bạn viết | Toàn bài |
 
-  | Train trên | Test ViSD4SA (trong miền) | Shopee 10 sản phẩm giữ lại |
-  |---|---|---|
-  | A (ViSD4SA) | 0,704 | **0,551** |
-  | B (Shopee) | 0,498 | 0,667 |
-  | A+B | **0,710** | **0,668** |
+**Kết quả tạm (nhãn sao) để bạn hình dung:**
+- CV GroupKFold: TF-IDF+LR 0,628 ± 0,108; LinearSVC 0,626; baseline NB 0,574.
+- Thêm đặc trưng mới **không giúp** (0,603), và đây vẫn là kết quả phải báo.
+- KFold xáo ngẫu nhiên cho 0,692, tức cao giả khoảng 0,06 vì rò rỉ sản phẩm.
+- Gõ không dấu làm F1 giảm từ 0,61 xuống 0,46; thêm Aug kéo lên 0,53.
 
-  F1 giảm từ 0,70 xuống 0,55 khi chuyển miền. Nguyên nhân chính là lớp neu (F1 chỉ 0,12): ViSD4SA hầu như không có câu trung lập cả bài. Gộp A+B cho kết quả tốt ở cả hai miền. Đây chính là câu chuyện cho Chương 5.
+**Những ô "Nhận xét (tự viết)"** trong notebook là phần bạn phải tự làm. Đó cũng là chỗ giảng viên chấm "mỗi biểu đồ có insight".
+
+Lịch còn lại, thay cho các mục "Làm gì" ở mục 4 khi trùng:
+
+| Ngày | Việc của bạn |
+|---|---|
+| 2/11 | Gán 150 câu vàng. Đọc `src/features.py`, notebook 05 và viết các ô nhận xét. Hỏi giảng viên (làm cá nhân, mã đề tài) |
+| 3/11 | Gán đủ 300 câu + 150 câu khía cạnh, gán lại 60 câu để tính kappa. Lưu thành `labeling/gold_500.csv`. Chạy lại `03` (phần 2) → `04` → `06` → `07` → `09` → `10` (*Restart & Run All*). Đọc notebook 06 và trả lời các câu tự kiểm tra |
+| 4/11 | Chạy `08_phobert_colab` trên Colab, giải nén vào `report/phobert/`, chạy lại `09`. Đọc notebook 07 |
+| 5/11 | Đọc notebook 09: **sửa giả định chi phí** cho hợp lý, chọn 3 câu SHAP dễ giải thích, điền `nhom_loi` trong `report/error_analysis.csv` |
+| 6/11 | Notebook 10: bổ sung từ khóa ABSA (dùng câu ngoài tập vàng), chọn và viết top 3 vấn đề kèm hành động |
+| 7/11 | `streamlit run app/dashboard.py`, chụp màn hình, deploy Streamlit Cloud, quay video 2–3 phút, nhờ 3–5 người dùng thử |
+| 8–10/11 | Viết các chỗ `[VIẾT]` trong `report/bao_cao.qmd`, cài TinyTeX, render PDF, đóng gói |
+
+Render báo cáo (chạy trong thư mục `report/`; lần đầu cần `quarto install tinytex`):
+
+```powershell
+$env:QUARTO_PYTHON = "E:\Phân_tích_cảm_xúc\.venv\Scripts\python.exe"; quarto render bao_cao.qmd --to pdf
+```
 
 ---
 
-## 1. Chuẩn bị môi trường (làm ngay 22/10)
+## 1. Dữ liệu (số liệu đã kiểm tra)
 
-Máy bạn đã có Python 3.11, scikit-learn, matplotlib, seaborn, wordcloud. Còn thiếu:
+| Nguồn | Nội dung | Vai trò |
+|---|---|---|
+| **A: UIT-ViSD4SA** (`ViSD4SA/`) | 11.122 review điện thoại, nhãn cụm từ, 10 khía cạnh × 3 cảm xúc. Sau làm sạch 10.510 (train 7.344 / dev 1.046 / test 2.120) | Train 3 lớp và ABSA. Với tập vàng Shopee đây là **ngoài miền** |
+| **B: `data/final_train_dataset.csv`** | 2.843 review Shopee, 32 sản phẩm, sao 1–5. Sau làm sạch 2.548 | 22 sản phẩm (1.794 câu) để train với nhãn yếu từ sao; 10 sản phẩm (746 câu) làm kho **tập vàng**; toàn bộ cho phân tích kinh doanh |
+| **Aug: `data/aug_unaccented_reviews.jsonl`** | 1.347 review **không dấu**, 2 lớp, có thể do AI sinh. Giữ 1.205 câu sao khớp nhãn | **Chỉ train**, không bao giờ vào test |
+
+Những điểm cần nhớ khi viết báo cáo:
+- Shopee: pos 67%, neg 23%, neu chỉ 9,5%. Đoán "pos" hết được accuracy 0,689 nhưng F1-macro 0,272, nên **chỉ số chính là F1-macro**.
+- Phải **chia theo sản phẩm** (`GroupShuffleSplit`, `random_state=42`) vì khăn ướt Bobby đã có 518 review.
+- ViSD4SA chuyển nhãn cụm → nhãn câu: cùng cảm xúc thì lấy cảm xúc đó; lẫn lộn thì ưu tiên `GENERAL`, không có thì lấy đa số; hòa thì bỏ câu. 39% review có nhiều cảm xúc.
+- ViSD4SA không có khía cạnh **giao hàng** (chỉ 51 review nhắc tới), nên khía cạnh này lấy bằng từ điển trên Shopee.
+- Baseline hiện tại (nhãn sao): A → Shopee 0,53; B → Shopee 0,65; A+B → 0,61. F1 trong miền ViSD4SA khoảng 0,71–0,74.
+
+Code làm sạch, chia tập, chuyển nhãn ViSD4SA nằm trong `notebook/02_clean_split.ipynb`; bảng các bước làm sạch ở `data/processed/cleaning_steps.csv`; ghi chú ở `report/notes_du_lieu.md`.
+
+---
+
+## 2. Quy cách nộp bài và Quarto
+
+### Cấu trúc thư mục nộp
+
+Nén thành `[Nhom_XX]_[MaDeTai]_[TenDeTai].zip` (hỏi giảng viên mã đề tài):
+
+```
+[Nhom_XX]_[MaDeTai]_[TenDeTai]/
+├── bao_cao.qmd            # nguồn Quarto
+├── bao_cao.pdf            # quarto render bao_cao.qmd --to pdf
+├── references.bib
+├── figures/               # ảnh do notebook xuất ra
+├── code/                  # = notebook/ + src/ + app/, đã Restart & Run All
+│   └── requirements.txt
+├── data/                  # file nhỏ; file > 50MB thì để link Drive/Kaggle trong README
+└── demo/                  # README.md chứa link Streamlit Cloud / HF Spaces và/hoặc video 2–3 phút
+```
+
+Trong repo hiện tại có thể giữ `notebook/`, chỉ đổi tên khi đóng gói.
+
+### Cài đặt
 
 ```bash
-pip install underthesea pyvi gensim emoji streamlit plotly jupyter
+quarto install tinytex
+pip install shap optuna
 ```
 
-PhoBERT thì chạy trên **Google Colab hoặc Kaggle** (GPU miễn phí). Không cần cài torch hay transformers trên máy.
+Quarto chạy chunk Python bằng Jupyter của `.venv`. Nếu Quarto không tìm đúng Python, đặt biến `QUARTO_PYTHON` trỏ tới `.venv\Scripts\python.exe`.
 
-Cấu trúc thư mục nên dùng (để nguyên 2 file gốc trong `data/`, không sửa trực tiếp):
+### YAML (theo mẫu PDF, thêm danh mục bảng/hình và tài liệu tham khảo)
 
+```yaml
+---
+title: "Phân tích cảm xúc đánh giá sản phẩm thương mại điện tử tiếng Việt theo khía cạnh"
+subtitle: "Học phần Trí tuệ Nhân tạo Ứng dụng & Khoa học Dữ liệu"
+author: "Nhóm XX: [Họ tên và MSSV các thành viên]"
+date: "2026-11-11"
+lang: vi
+format:
+  pdf:
+    documentclass: article
+    papersize: a4
+    pdf-engine: xelatex
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    fontsize: 11pt
+    lof: true
+    lot: true
+bibliography: references.bib
+csl: apa.csl
+execute:
+  echo: false
+  warning: false
+---
 ```
-Phân_tích_cảm_xúc/
-├── ViSD4SA/             # train/dev/test.jsonl (đã có), chỉ đọc
-├── data/                 # 2 file gốc, chỉ đọc
-│   └── processed/        # file đã làm sạch, do code sinh ra
-├── notebooks/            # 01_eda, 02_preprocess, 03_baseline, ...
-├── src/
-│   ├── preprocess.py     # hàm tiền xử lý dùng chung
-│   └── aspects.py        # từ điển khía cạnh
-├── labeling/             # tập vàng + hướng dẫn gán nhãn
-├── app/dashboard.py
-└── report/
-```
 
-Tạo repo git ngay từ đầu (`git init`) và commit mỗi tối. Ghi `random_state=42` ở mọi chỗ có ngẫu nhiên.
+### Quy tắc trình bày
+
+- **Không chạy mô hình trong `.qmd`.** Notebook lưu hình (`figures/*.png`) và bảng (`report/*.csv`); file `.qmd` chỉ đọc lại. Render nhanh và không lỗi.
+- Hình: `![Ma trận nhầm lẫn của PhoBERT trên tập vàng](figures/cm_phobert.png){#fig-cm}`, gọi bằng `@fig-cm`. Chú thích nằm **dưới** hình.
+- Bảng: chunk có `#| label: tbl-main` và `#| tbl-cap: "..."`, chú thích nằm **trên** bảng.
+- Mỗi hình và bảng phải có **một câu nhận xét ý nghĩa kinh doanh** ngay sau nó.
+- Trích dẫn APA: `[@nguyen2020phobert]`. Cần trích ít nhất PhoBERT, ViSD4SA, scikit-learn, SHAP, CRISP-DM, nguồn dữ liệu Shopee.
+- Trang đầu: trang bìa (trường, khoa, môn, đề tài, thành viên + MSSV, giảng viên, địa danh, năm học), **bảng phân công và % đóng góp**, mục lục, danh mục từ viết tắt, danh mục bảng/hình.
+- **Tuyên bố sử dụng AI** (trong Lời cảm ơn): công cụ nào (Claude), dùng vào việc gì (gợi ý code, kiểm tra dữ liệu, góp ý cấu trúc), phần nào do bạn tự làm và tự kiểm chứng. Nhắc luôn bảng sản phẩm → ngành hàng do Claude gán và đã được bạn kiểm tra lại.
 
 ---
 
-## 2. Lộ trình từng ngày
+## 3. Cấu trúc 6 phần của báo cáo
 
-### Chặng 1: Dữ liệu và tập vàng (22/10 – 27/10)
+Ước lượng trang để không vượt 45: P1 ~6, P2 ~3, P3 ~9, P4 ~9, P5 ~9, P6 ~6, phần đầu + tài liệu tham khảo ~3.
 
-#### 22/10 (T5): Hiểu dữ liệu
-**Học gì:** EDA (khám phá dữ liệu) để làm gì; nhãn yếu (weak label) khác nhãn vàng (gold label) ra sao; lệch lớp ảnh hưởng thế nào tới accuracy.
+### P1. Giới thiệu & bài toán kinh doanh (15%), Empathize & Define
 
-**Làm gì:**
-1. Hỏi giảng viên hai việc: dataset tải về có được tính điểm tự cào không, và phụ lục có tính vào giới hạn 30 trang không.
-2. ViSD4SA đã có trong `ViSD4SA/`. Tự mở 10 dòng đầu, dùng `text[start:end]` in ra từng cụm cùng nhãn của nó để hiểu cách gán nhãn. Đối chiếu số liệu của bạn với mục "Kết quả kiểm tra ViSD4SA" ở trên.
-3. Notebook `01_eda.ipynb` cho cả 3 nguồn: số dòng, phân bố nhãn, độ dài (số từ), số trùng, 10 sản phẩm nhiều review nhất.
+- **1.1 Bối cảnh và pain point:** một shop trên Shopee nhận hàng trăm review mỗi tháng; đọc tay tốn thời gian; review chê không được phản hồi kịp thì mất khách; số sao không phản ánh đúng nội dung (dẫn bảng chéo nhãn tay × số sao ở P3).
+- **1.2 Persona + Empathy Map:** chọn 1–2 persona, ví dụ "chủ shop mỹ phẩm nhỏ, tự làm CSKH" và "chuyên viên quản lý ngành hàng của sàn". Empathy Map 4 ô (Nghĩ/Cảm, Thấy, Nói/Làm, Nghe) + Pain/Gain. Vẽ bằng bảng 2×2 hoặc hình.
+- **1.3 Loại bài toán và mục tiêu SMART:** thuộc nhóm **Insight** (và một phần **Solution** – tự động phân loại). Ví dụ SMART: "Trong 1 tháng thử nghiệm, tự động gắn nhãn cảm xúc với F1-macro ≥ 0,70 trên review thật, phát hiện ≥ 85% review tiêu cực (Recall lớp neg), giảm 70% thời gian đọc review." KPI: F1-macro, Recall-neg, thời gian phản hồi review chê.
+- **1.4 ROI:** công thức ở ngày 5/11. **Ghi rõ đâu là giả định** (lương, số review, giá trị một khách hàng).
 
-```python
-import pandas as pd
-df = pd.read_csv("data/final_train_dataset.csv").rename(
-    columns={"prod": "product", "com": "text", "rat": "rating"})
-print(df.rating.value_counts().sort_index())
-print(df.groupby("product").rating.agg(["size", "mean"]).sort_values("size"))
-df["n_words"] = df.text.str.split().str.len()
-df.n_words.hist(bins=50)
-```
+### P2. Cơ sở lý thuyết & quy trình (10%)
 
-4. Tự làm bảng `product → ngành hàng` cho 32 sản phẩm (mỹ phẩm, mẹ & bé, thời trang, điện tử, thể thao, sách – văn phòng phẩm, đồ ăn) và lưu thành `data/processed/product_category.csv`. Phần kinh doanh sẽ cần bảng này.
+- Sơ đồ CRISP-DM 6 bước, mỗi bước ghi notebook/ngày tương ứng của đồ án.
+- Mỗi thuật toán 1 đoạn: nguyên lý + **vì sao chọn**. BoW/TF-IDF + NB (baseline nhanh), LR, LinearSVC (mạnh với văn bản thưa), Word2Vec (ngữ nghĩa từ), PhoBERT (ngữ cảnh, phủ định), ABSA từ điển, SHAP.
 
-**Tự kiểm tra:** Nếu mô hình đoán "pos" cho mọi câu thì accuracy bao nhiêu, F1-macro bao nhiêu? (Gợi ý: accuracy ~67%, F1-macro chỉ ~0,27.) Vì sao số sao không phải là nhãn cảm xúc chuẩn? Hãy tìm 3 ví dụ 4–5 sao mà nội dung lại chê.
+### P3. Khám phá & tiền xử lý dữ liệu (20%)
 
-**Đầu ra:** `notes_du_lieu.md`, gồm bảng nhãn của 3 nguồn và câu trả lời của giảng viên.
+- **3.1 Từ điển dữ liệu:** bảng cho từng nguồn: tên cột, kiểu, ý nghĩa, ý nghĩa kinh doanh. Ví dụ `rating`: số sao 1–5, đại diện mức hài lòng tổng quát nhưng là nhãn yếu.
+- **3.2 EDA + insight:** phân bố nhãn và độ lệch, độ dài review theo số sao, review theo ngành hàng, tương quan giữa các đặc trưng mới và số sao, bảng chéo nhãn tay × sao, word cloud pos/neg.
+- **3.3 Tiền xử lý:** bảng 2.843 → 2.548, 5 ví dụ trước/sau, lý do chia theo sản phẩm, thí nghiệm có/không tiền xử lý, **feature engineering**, chống rò rỉ (khử trùng trước khi chia, kiểm tra trùng chéo, Aug chỉ train).
 
-#### 23/10 (T6): Tiền xử lý tiếng Việt
-**Học gì:** Unicode NFC và NFD (cùng chữ "ố" nhưng có thể là 1 hay 2 ký tự); teencode; emoji mang cảm xúc; vì sao tiếng Việt cần **tách từ** ("hài_lòng" là một từ, không phải hai); stopword và **vì sao không được xóa từ phủ định** ("không", "chưa", "chẳng").
+### P4. Thiết kế, huấn luyện & tối ưu mô hình (20%; rubric III 25%)
 
-**Làm gì:** viết `src/preprocess.py`.
+- Baseline: BoW+NB.
+- Mô hình nâng cao (≥ 3): TF-IDF+LR, TF-IDF+LinearSVC, TF-IDF+đặc trưng mới+LR, Word2Vec+LR, PhoBERT.
+- Thí nghiệm nguồn train: A, B, A+B, A+B+Aug.
+- GroupKFold CV, GridSearch/Optuna, Learning Curve, đường loss PhoBERT.
 
-```python
-import re, unicodedata
-import emoji
-from underthesea import word_tokenize
+### P5. Đánh giá chuyên sâu, XAI & đạo đức AI (20%; rubric IV 15%)
 
-TEENCODE = {"k": "không", "ko": "không", "kh": "không", "hok": "không",
-            "dc": "được", "đc": "được", "sp": "sản phẩm", "mik": "mình",
-            "mn": "mọi người", "ok": "ổn", "oke": "ổn", "s": "sao",
-            "vs": "với", "nx": "nữa", "ship": "giao hàng", "shop": "cửa hàng"}
-# tự bổ sung thêm khi đọc dữ liệu, mục tiêu 50–100 mục
+- Bảng chính, ROC-AUC/PR-AUC, khoảng tin cậy bootstrap, ma trận nhầm lẫn + chi phí, phân tích lỗi.
+- SHAP summary + giải thích 3 câu cụ thể (1 đúng, 1 sai, 1 có phủ định).
+- Fairness: F1 theo ngành hàng, F1 trên văn bản không dấu; quyền riêng tư; dữ liệu do AI sinh; Human-in-the-loop.
+- Kết quả ABSA.
 
-def normalize_text(s: str) -> str:
-    s = unicodedata.normalize("NFC", str(s)).lower()
-    s = emoji.demojize(s, delimiters=(" EMO_", " "))   # 😂 -> EMO_face_with_tears_of_joy
-    s = re.sub(r"https?://\S+", " ", s)
-    s = re.sub(r"(.)\1{2,}", r"\1", s)                  # "thommm" -> "thom"
-    tokens = [TEENCODE.get(t, t) for t in re.findall(r"\w+|[^\w\s]", s)]
-    return " ".join(tokens)
+### P6. Sản phẩm mẫu, ứng dụng & hướng phát triển (15%)
 
-def preprocess(s: str, segment=True) -> str:
-    s = normalize_text(s)
-    return word_tokenize(s, format="text") if segment else s
-```
-
-Chạy thử trên 20 câu thật trong CSV, in ra trước/sau rồi tự sửa từ điển teencode.
-
-**Tự kiểm tra:** Vì sao phải chuẩn hóa NFC trước khi so khớp từ điển? Nếu xóa "không" thì câu "không đẹp" thành gì? Thay emoji bằng chữ thì được gì so với xóa emoji?
-
-**Đầu ra:** `src/preprocess.py` cùng bảng 5 ví dụ trước/sau (dùng cho Chương 4, mục Preprocessing được 15 điểm).
-
-#### 24/10 (T7): Làm sạch và chia tập
-**Học gì:** **rò rỉ dữ liệu** (data leakage); vì sao khử trùng lặp **trước** khi chia; vì sao chia **theo sản phẩm** (`GroupShuffleSplit`).
-
-**Làm gì:** notebook `02_clean_split.ipynb`. Đoạn code dưới đây mình đã chạy thử trên file của bạn, ra đúng 2.548 dòng.
-
-```python
-import re, unicodedata, pandas as pd
-from sklearn.model_selection import GroupShuffleSplit
-
-df = pd.read_csv("data/final_train_dataset.csv").rename(
-    columns={"prod": "product", "com": "text", "rat": "rating"})
-df["text"] = df["text"].astype(str).map(lambda s: unicodedata.normalize("NFC", s))
-
-# 1) bỏ rác giao diện "Tổng quan\n4.9\n(3034 đánh giá)..."
-df = df[~df["text"].str.match(r"^\s*Tổng quan\s*\n\s*\d")]
-# 2) bỏ nhãn mục template "Chất lượng sản phẩm:", "Đúng với mô tả:", ... ở đầu dòng
-LABEL_RE = re.compile(r"(?m)^\s*[^:\n]{3,25}:\s*")
-df["text_clean"] = (df["text"].str.replace(LABEL_RE, "", regex=True)
-                    .str.replace(r"\s+", " ", regex=True).str.strip())
-# 3) khử trùng lặp TRƯỚC khi chia, bỏ câu < 2 từ
-df = df.drop_duplicates(subset=["text_clean"])
-df = df[df["text_clean"].str.split().str.len() >= 2]
-# 4) nhãn yếu từ số sao
-df["weak_label"] = df["rating"].map({1: "neg", 2: "neg", 3: "neu", 4: "pos", 5: "pos"})
-
-# 5) chia theo sản phẩm: 70% sản phẩm để train, 30% làm kho tập vàng
-gss = GroupShuffleSplit(n_splits=1, test_size=0.3, random_state=42)
-tr_idx, gold_idx = next(gss.split(df, groups=df["product"]))
-df.iloc[tr_idx].to_csv("data/processed/shopee_train.csv", index=False)
-df.iloc[gold_idx].to_csv("data/processed/shopee_gold_pool.csv", index=False)
-```
-
-JSONL (không dấu): giữ những câu có sao và nhãn khớp nhau, bỏ câu 3 sao:
-
-```python
-j = pd.read_json("data/aug_unaccented_reviews.jsonl", lines=True)
-keep = ((j.rating <= 2) & (j.label == "negative")) | ((j.rating >= 4) & (j.label == "positive"))
-aug = j[keep].assign(weak_label=j.label.map({"negative": "neg", "positive": "pos"}))
-aug.to_csv("data/processed/aug_train.csv", index=False)   # 1.206 câu, chỉ có pos/neg
-```
-
-ViSD4SA: chuyển nhãn cụm từ thành nhãn cả câu. Ghi rõ quy tắc này trong báo cáo:
-- Mọi cụm cùng một cảm xúc thì nhận cảm xúc đó.
-- Nếu lẫn lộn: có khía cạnh `GENERAL` thì lấy cảm xúc của `GENERAL`, không thì lấy cảm xúc chiếm đa số.
-- Hòa thì **bỏ câu**. Không gán `neu`, vì "khen pin, chê camera" không phải là trung lập.
-
-```python
-import json, collections, unicodedata
-import pandas as pd
-
-MAP4 = {"PRICE": "gia_ca", "SER&ACC": "dich_vu"}          # 8 khía cạnh còn lại -> chat_luong
-POL = {"POSITIVE": "pos", "NEGATIVE": "neg", "NEUTRAL": "neu"}
-
-def sentence_label(spans):
-    pols = [t.split("#")[1] for _, _, t in spans]
-    if not pols:
-        return None
-    if len(set(pols)) == 1:
-        return POL[pols[0]]
-    gen = [t.split("#")[1] for _, _, t in spans if t.startswith("GENERAL#")]
-    if gen:
-        return POL[collections.Counter(gen).most_common(1)[0][0]]
-    (p1, c1), (p2, c2) = collections.Counter(pols).most_common(2)
-    return None if c1 == c2 else POL[p1]
-
-def load_visd(split):
-    rows = []
-    for line in open(f"ViSD4SA/{split}.jsonl", encoding="utf-8"):
-        r = json.loads(line)
-        text = r["text"]
-        aspects = {}
-        for st, en, tag in r["labels"]:
-            en = min(en, len(text))                        # sửa 122 cụm có end vượt độ dài câu
-            asp, pol = tag.split("#")
-            aspects.setdefault(MAP4.get(asp, "chat_luong"), []).append(POL[pol])
-        rows.append({"text": unicodedata.normalize("NFC", text),   # NFC SAU khi đã dùng offset
-                     "label": sentence_label(r["labels"]),
-                     **{a: collections.Counter(v).most_common(1)[0][0] for a, v in aspects.items()}})
-    return pd.DataFrame(rows).dropna(subset=["label"])
-
-visd = {sp: load_visd(sp) for sp in ["train", "dev", "test"]}
-```
-
-Bảng kết quả có thêm các cột `chat_luong`, `gia_ca`, `dich_vu`, mỗi cột nhận pos/neg/neu hoặc trống. Đây là **dữ liệu ABSA có nhãn để huấn luyện** cho 3 trong 4 khía cạnh. Khía cạnh giao hàng thì không có nhãn trong ViSD4SA.
-
-Ánh xạ 10 khía cạnh của ViSD4SA về 4 nhóm:
-
-| ViSD4SA | Nhóm của đề |
-|---|---|
-| SCREEN, CAMERA, FEATURES, BATTERY, PERFORMANCE, STORAGE, DESIGN, GENERAL | Chất lượng |
-| PRICE | Giá cả |
-| SER&ACC | Dịch vụ |
-| *(không có)* | Giao hàng: lấy từ từ điển khía cạnh, xem ngày 1/11 |
-
-Cuối cùng, kiểm tra trùng chéo: chuẩn hóa (bỏ dấu, viết thường) rồi xem câu nào trong tập vàng xuất hiện trong ViSD4SA, `shopee_train` hoặc `aug`. Nếu có thì xóa khỏi tập train.
-
-**Tự kiểm tra:** Nếu chia ngẫu nhiên từng dòng thay vì theo sản phẩm, F1 sẽ cao lên hay thấp xuống, vì sao? (Gợi ý: mô hình học thuộc tên và đặc điểm sản phẩm.) Vì sao JSONL chỉ được dùng để huấn luyện?
-
-**Đầu ra:** các file trong `data/processed/` và bảng "số dòng sau từng bước làm sạch" (đưa vào Chương 3).
-
-#### 25/10 (CN): Hướng dẫn gán nhãn và 150 mẫu đầu
-**Học gì:** vì sao cần **hướng dẫn gán nhãn** (annotation guideline) viết trước khi gán; độ đồng thuận giữa người gán (Cohen's kappa).
-
-**Làm gì:**
-1. Từ `shopee_gold_pool.csv` (~700 câu), lấy 500 câu **phân tầng theo sao** (`df.groupby("rating").sample(...)`) và lấy dư lớp 1–3 sao để lớp neg/neu đủ mẫu.
-2. Viết `labeling/guideline.md` (1–2 trang):
-   - Định nghĩa pos/neg/neu.
-   - Câu khen một ý chê một ý thì xử lý thế nào (ví dụ: theo ý chính hoặc theo kết luận cuối câu).
-   - Câu mỉa mai.
-   - Câu chỉ mô tả mà không đánh giá (gán neu).
-   - Mỗi trường hợp kèm 2–3 ví dụ lấy từ chính dữ liệu.
-3. Gán nhãn trong Excel/Google Sheets với các cột `id, text, sentiment, giao_hang, chat_luong, gia_ca, dich_vu, ghi_chu`. **Che cột sao đi** khi gán để khỏi bị ảnh hưởng. Mỗi khía cạnh nhận một trong các giá trị `pos/neg/neu/none`. 200 câu đầu gán cả khía cạnh, các câu còn lại chỉ gán cảm xúc.
-4. Gán 150 câu. **Bắt đầu viết Chương 3.**
-
-**Tự kiểm tra:** Đọc lại 20 câu khó nhất. Guideline đã đủ rõ để người khác gán ra cùng nhãn chưa?
-
-#### 26/10 (T2) và 27/10 (T3): Hoàn tất tập vàng
-- Gán tiếp tới **500 câu cảm xúc** và **200 câu khía cạnh**, chia buổi 150 câu mỗi lần để đỡ mỏi.
-- **Độ đồng thuận:**
-  - Nếu làm nhóm: hai người cùng gán 100 câu rồi tính `sklearn.metrics.cohen_kappa_score`.
-  - Nếu làm một mình: gán lại 60 câu đã gán từ hôm 25/10 mà không xem nhãn cũ, rồi tính kappa giữa hai lần gán (intra-annotator agreement).
-- **Phân tích thú vị cho báo cáo:** lập bảng chéo giữa nhãn tay và số sao. Bao nhiêu % câu 4 sao thật ra là neg hoặc neu? Con số này chứng minh vì sao cần tập vàng.
-
-**Đầu ra:** `labeling/gold_500.csv`, `guideline.md`, giá trị kappa.
+- Kiến trúc và ảnh giao diện app; kịch bản sử dụng: nhập review → dự đoán → khuyến nghị.
+- Top 3 vấn đề kinh doanh (số liệu + câu trích + hành động).
+- Kế hoạch triển khai: tích hợp vào quy trình CSKH, theo dõi drift.
+- Phản hồi người dùng thật (điểm thưởng).
+- Hạn chế và hướng mở rộng.
 
 ---
 
-### Chặng 2: Mô hình (28/10 – 31/10)
+## 4. Lộ trình 02/11 – 11/11
 
-**Quy tắc chung:**
-- Mọi mô hình đều báo cáo **hai con số**: F1-macro **trong miền** (test của chính nguồn huấn luyện) và F1-macro **trên tập vàng Shopee** (gold_500).
-- Các cấu hình huấn luyện: **A** (ViSD4SA), **B** (shopee_train), **A+B**, **A+B+Aug**.
-- Aug và các câu của A không có lớp neu nên làm lệch lớp neu. Đây là chỗ cần nhận xét trong báo cáo.
+Mỗi tối dành 1–1,5 giờ gán nhãn cho tới khi đủ 300 câu (gán 150 câu buổi đầu, nghỉ giữa chừng để đỡ mỏi). Thứ tự trong `gold_500_to_label.csv` đã xáo ngẫu nhiên, nên **300 dòng đầu vẫn giữ tỉ lệ các mức sao** (sao 1–5: 59 / 38 / 31 / 60 / 112). Gán khía cạnh cho **150 dòng đầu** trong số có `gan_khia_canh = có`.
 
-#### 28/10 (T4): BoW, TF-IDF với Naive Bayes và Logistic Regression. Mốc 1
-**Học gì:**
-- BoW đếm tần suất từ, TF-IDF giảm trọng số các từ xuất hiện ở mọi câu.
-- n-gram: bigram "không tốt" mang nghĩa ngược với "tốt".
-- Naive Bayes giả định các từ độc lập; Logistic Regression học trọng số cho từng từ.
-- `class_weight="balanced"` giúp mô hình không bỏ qua lớp ít mẫu.
+### 02/11 (T2): Tập vàng + EDA bổ sung + Feature engineering
+
+**Học gì:** skewness (độ lệch), tương quan Spearman với biến thứ bậc (số sao), feature engineering cho văn bản.
+
+**Làm gì:**
+1. Gán 150 câu vàng (cảm xúc + khía cạnh). Che cột sao.
+2. Trong `01_eda.ipynb` thêm:
+   - Bảng từ điển dữ liệu cho 3 nguồn.
+   - `scipy.stats.skew` cho số từ mỗi review; histogram có log-scale.
+   - Biểu đồ phân bố nhãn theo ngành hàng (`product_category.csv`; nhớ kiểm tra lại ngành hàng).
+3. Tạo `src/features.py`:
 
 ```python
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import re
+import numpy as np, pandas as pd
+
+NEG_WORDS = ["không", "chẳng", "chả", "chưa", "đừng", "kém", "tệ"]
+VN_ACCENT = re.compile(r"[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]")
+
+def text_features(s: str) -> dict:
+    words = s.lower().split()
+    return {
+        "n_words": len(words),
+        "n_negation": sum(w in NEG_WORDS for w in words),
+        "n_exclaim": s.count("!"),
+        "upper_ratio": sum(c.isupper() for c in s) / max(len(s), 1),   # viết HOA khi bực
+        "accent_ratio": len(VN_ACCENT.findall(s.lower())) / max(len(s), 1),  # gần 0 = không dấu
+    }
+
+def feature_frame(texts) -> pd.DataFrame:
+    return pd.DataFrame([text_features(t) for t in texts])
+```
+
+4. Vẽ heatmap tương quan Spearman giữa các đặc trưng này và `rating` trên 2.548 câu Shopee, kèm nhận xét (ví dụ: review càng dài càng ít sao? viết hoa nhiều đi với 1 sao?).
+
+**Tự kiểm tra:** Vì sao dùng Spearman chứ không phải Pearson với số sao? Đặc trưng nào có thể gây rò rỉ (ví dụ chứa thông tin lấy từ nhãn)?
+
+**Đầu ra:** `src/features.py`, hình `figures/eda_*.png`, 150 câu vàng.
+**Ghi vào:** P3.1, P3.2, P3.3.
+
+### 03/11 (T3): CV + tuning + learning curve cho các mô hình cổ điển
+
+**Học gì:** K-Fold vs **GroupKFold** (cùng sản phẩm không được nằm ở cả fold train lẫn fold val); GridSearchCV; learning curve cho biết thiếu dữ liệu hay mô hình quá phức tạp.
+
+**Làm gì:** gán thêm 150 câu (đủ 300). Notebook `05_tuning.ipynb`:
+
+```python
+from sklearn.model_selection import GroupKFold, GridSearchCV, learning_curve
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import f1_score, classification_report
+from sklearn.svm import LinearSVC
 
-vecs = {"BoW": CountVectorizer(ngram_range=(1, 2), min_df=2),
-        "TF-IDF": TfidfVectorizer(ngram_range=(1, 2), min_df=2, sublinear_tf=True)}
-clfs = {"NB": MultinomialNB(),
-        "LR": LogisticRegression(max_iter=2000, class_weight="balanced")}
-rows = []
-for cfg, (Xtr, ytr) in train_sets.items():        # {"A": (...), "B": (...), "A+B": (...), ...}
-    for vn, v in vecs.items():
-        for cn, c in clfs.items():
-            m = make_pipeline(v, c).fit(Xtr, ytr)
-            rows.append({"train": cfg, "model": f"{vn}+{cn}",
-                         "F1_gold": f1_score(gold.sentiment, m.predict(gold.text_prep), average="macro")})
-pd.DataFrame(rows).pivot(index="model", columns="train", values="F1_gold")
+tr = pd.read_csv("data/processed/shopee_train.csv")       # B, có cột product
+X, y, groups = tr.text_prep, tr.weak_label, tr["product"]
+cv = GroupKFold(n_splits=5)
+
+pipe = Pipeline([("vec", TfidfVectorizer(sublinear_tf=True)),
+                 ("clf", LogisticRegression(max_iter=3000, class_weight="balanced"))])
+grid = [
+    {"vec__ngram_range": [(1, 1), (1, 2)], "vec__min_df": [1, 2, 3],
+     "clf": [LogisticRegression(max_iter=3000, class_weight="balanced")], "clf__C": [0.3, 1, 3, 10]},
+    {"vec__ngram_range": [(1, 1), (1, 2)], "vec__min_df": [1, 2, 3],
+     "clf": [LinearSVC(class_weight="balanced")], "clf__C": [0.1, 0.3, 1, 3]},
+]
+gs = GridSearchCV(pipe, grid, cv=cv, scoring="f1_macro", n_jobs=-1)
+gs.fit(X, y, groups=groups)
+res = pd.DataFrame(gs.cv_results_)[["params", "mean_test_score", "std_test_score"]]
 ```
 
-Mốc so sánh (đã chạy thử, nhãn sao, chưa tách từ): TF-IDF+LR đạt ~0,67. Sau tiền xử lý và trên nhãn tay, kết quả có thể khác. Ghi lại cả hai.
-
-**Tự kiểm tra:** In 20 từ có trọng số dương và âm lớn nhất của LR (`coef_`). Có từ nào là tên sản phẩm không? Nếu có thì đó là dấu hiệu mô hình học "lối tắt".
-
-**Đầu ra:** bảng baseline. **Bắt đầu viết Chương 4.**
-
-#### 29/10 (T5): Word2Vec và thí nghiệm có/không tiền xử lý
-**Học gì:**
-- Word2Vec biểu diễn mỗi từ bằng vector dày; từ gần nghĩa thì gần nhau.
-- Một câu = trung bình các vector từ (mean pooling). Nhược điểm của cách này: mất trật tự từ.
+- Báo cáo **mean ± std F1-macro qua 5 fold**, không chỉ một con số.
+- Lấy tham số tốt nhất, **huấn luyện lại trên A+B** rồi đánh giá trên ViSD4SA test và tập vàng. Lý do: ViSD4SA không có cột sản phẩm nên CV theo nhóm chỉ làm được trên B; ghi rõ điều này.
+- Thêm mô hình **TF-IDF + đặc trưng mới**: `ColumnTransformer` ghép `TfidfVectorizer` với `StandardScaler` của `feature_frame`, rồi so với TF-IDF thuần. Đây là bằng chứng feature engineering "giúp mô hình chính xác hơn" (hoặc không, cũng phải báo).
+- Learning curve:
 
 ```python
-from gensim.models import Word2Vec
-corpus = [s.split() for s in all_train_texts_prep]          # A + B + Aug, đã tách từ
-w2v = Word2Vec(corpus, vector_size=200, window=5, min_count=2, sg=1, epochs=20, seed=42)
-print(w2v.wv.most_similar("tệ"))                             # kiểm tra vector có hợp lý không
-def sent_vec(s):
-    vs = [w2v.wv[t] for t in s.split() if t in w2v.wv]
-    return np.mean(vs, axis=0) if vs else np.zeros(200)
+sizes, tr_sc, va_sc = learning_curve(gs.best_estimator_, X, y, groups=groups, cv=cv,
+                                     scoring="f1_macro", train_sizes=np.linspace(0.1, 1, 6))
 ```
 
-Rồi chạy Logistic Regression trên các vector câu.
+Vẽ 2 đường train/validation. Khoảng cách lớn → overfitting; cả hai thấp và sát nhau → underfitting; đường val còn đi lên → thêm dữ liệu sẽ có ích.
 
-**Thí nghiệm tiền xử lý** (cần cho mục 15 điểm): với TF-IDF+LR, so sánh bốn biến thể trên tập vàng:
-1. Văn bản thô.
-2. Chỉ chuẩn hóa (NFC, viết thường, teencode, emoji).
-3. Chuẩn hóa + tách từ.
-4. Biến thể 3 + bỏ stopword nhưng giữ từ phủ định.
+**Tự kiểm tra:** Nếu dùng `KFold` thường thì điểm CV cao hơn hay thấp hơn, vì sao? Chạy thử để kiểm chứng (một dòng trong báo cáo).
 
-**Thí nghiệm không dấu:** bỏ dấu tập vàng (dùng `unicodedata` như đoạn kiểm tra trùng), đánh giá mô hình train trên A+B và trên A+B+Aug. Aug có giúp mô hình chịu được câu không dấu không?
+**Đầu ra:** bảng CV, tham số tốt nhất, `figures/learning_curve_*.png`, 300 câu vàng.
+**Ghi vào:** P4.
 
-**Đầu ra:** bảng Word2Vec, bảng ảnh hưởng tiền xử lý, bảng thí nghiệm không dấu.
+### 04/11 (T4): Word2Vec, PhoBERT, thí nghiệm tiền xử lý. Mốc 1
 
-#### 30/10 (T6): Fine-tune PhoBERT (Colab/Kaggle)
-**Học gì:**
-- Transformer và fine-tune là gì: lấy mô hình đã học tiếng Việt sẵn, huấn luyện thêm một lớp phân loại lên trên.
-- PhoBERT **yêu cầu văn bản đã tách từ** (dùng VnCoreNLP hoặc underthesea, ra dạng "hài_lòng").
-- `max_len`, learning rate, số epoch có ý nghĩa gì; dùng tập dev để chọn checkpoint.
+**Học gì:** Word2Vec + mean pooling (mất trật tự từ); fine-tune PhoBERT (phải tách từ, `max_len`, learning rate, epoch, chọn checkpoint bằng dev).
+
+**Làm gì:**
+1. **Sáng: bật PhoBERT trên Colab/Kaggle trước** (chạy nền trong lúc làm việc khác). Cấu hình A+B trước.
 
 ```python
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
@@ -364,135 +328,186 @@ tok = AutoTokenizer.from_pretrained("vinai/phobert-base")
 model = AutoModelForSequenceClassification.from_pretrained("vinai/phobert-base", num_labels=3)
 args = TrainingArguments("out", learning_rate=2e-5, num_train_epochs=4,
                          per_device_train_batch_size=32, eval_strategy="epoch",
-                         save_strategy="epoch", load_best_model_at_end=True,
-                         metric_for_best_model="f1_macro", seed=42, fp16=True)
-# tokenize với max_length=128, truncation=True; compute_metrics trả f1_macro
+                         save_strategy="epoch", logging_strategy="epoch",
+                         load_best_model_at_end=True, metric_for_best_model="f1_macro",
+                         seed=42, fp16=True)
+# tokenize max_length=128, truncation=True; compute_metrics trả f1_macro
 ```
 
-Nếu ít thời gian, chạy trước cấu hình **A+B**, rồi mới tới A và B.
+   - Thử 2 learning rate (`2e-5`, `3e-5`) trên dev = "tuning" cho PhoBERT. Ghi rõ vì sao không làm 5-fold (mỗi lần fine-tune mất nhiều GPU).
+   - Lưu `trainer.state.log_history` để vẽ **đường loss train/val theo epoch** (learning curve của PhoBERT).
+   - Lưu **xác suất dự đoán** (`softmax` của logits) trên tập vàng ra CSV để tính ROC/PR-AUC ngày 5/11.
+2. Word2Vec + LR (code mẫu cũ: `Word2Vec(vector_size=200, window=5, min_count=2, sg=1, epochs=20, seed=42)`), kiểm tra `most_similar("tệ")`.
+3. **Thí nghiệm tiền xử lý** với mô hình TF-IDF tốt nhất: (1) văn bản thô, (2) chuẩn hóa, (3) chuẩn hóa + tách từ, (4) = (3) + bỏ stopword nhưng giữ phủ định.
+4. **Thí nghiệm không dấu:** bỏ dấu tập vàng, so mô hình train A+B với A+B+Aug.
+5. Chạy lại `04_baseline.ipynb` với **nhãn tay** của 300 câu vàng.
 
-**Tự kiểm tra:** Vì sao PhoBERT thường hơn TF-IDF ở các câu phủ định và câu dài? Kiểm chứng bằng ví dụ ở ngày 31/10.
+**Nếu tới tối 4/11 PhoBERT chưa chạy được:** dùng `wonrax/phobert-base-vietnamese-sentiment` chạy thẳng trên tập vàng làm đại diện, và ghi vào hạn chế.
 
-#### 31/10 (T7): Tinh chỉnh, mốc so sánh, đánh giá ngoài miền. Mốc 2
-1. Thử class weight hoặc oversampling cho lớp neu; thử thêm 1–2 giá trị learning rate.
-2. So với mô hình fine-tune sẵn `wonrax/phobert-base-vietnamese-sentiment`, chạy thẳng trên tập vàng. Lưu ý mô hình này cũng được huấn luyện trên review TMĐT nên chỉ dùng để tham khảo.
-3. **Bảng kết quả chính**: các hàng là mô hình, các cột là F1 trong miền và F1 trên tập vàng cho từng cấu hình train.
-4. Vẽ confusion matrix của mô hình tốt nhất trên tập vàng.
-5. **Phân tích lỗi:** lấy 20–30 câu đoán sai, xếp vào các nhóm: phủ định, mỉa mai, nhiều khía cạnh trái chiều, teencode/không dấu, câu chỉ mô tả.
-6. **Bootstrap khoảng tin cậy cho F1** (tập vàng chỉ có 500 câu): lấy mẫu lại 1.000 lần rồi báo khoảng 2,5%–97,5%.
+**Đầu ra:** bảng chính (hàng: mô hình; cột: F1 trong miền, F1 tập vàng, cho từng cấu hình train), bảng tiền xử lý, bảng không dấu.
+**Ghi vào:** P3.3 (tiền xử lý), P4, P5.
 
-**Nếu tới tối 31/10 vẫn chưa có PhoBERT tự fine-tune:** dùng mô hình của wonrax làm đại diện PhoBERT và ghi vào phần hạn chế.
+### 05/11 (T5): Đánh giá chuyên sâu, XAI, đạo đức, ROI
 
----
+**Học gì:** ROC-AUC vs PR-AUC (PR-AUC đáng tin hơn khi lớp hiếm như neu/neg); one-vs-rest cho bài 3 lớp; SHAP (đóng góp của từng từ vào dự đoán); chi phí sai loại 1/loại 2.
 
-### Chặng 3: ABSA, phân tích kinh doanh, dashboard (1/11 – 4/11)
+**Làm gì:** notebook `06_evaluation.ipynb`.
 
-#### 1/11 (CN): ABSA 4 khía cạnh
-**Học gì:** ABSA gồm hai bước: (1) câu nói về khía cạnh nào, (2) cảm xúc với khía cạnh đó là gì.
+1. Chỉ số đầy đủ cho mô hình tốt nhất trên tập vàng:
 
-**Cách 1: Từ điển + mô hình cảm xúc** (`src/aspects.py`):
+```python
+from sklearn.metrics import classification_report, roc_auc_score, average_precision_score
+from sklearn.preprocessing import label_binarize
+classes = ["neg", "neu", "pos"]
+Y = label_binarize(gold.sentiment, classes=classes)
+print(classification_report(gold.sentiment, pred, digits=3))
+print("ROC-AUC (OvR, macro):", roc_auc_score(Y, proba, average="macro"))
+print("PR-AUC per class:", average_precision_score(Y, proba, average=None))
+```
+
+   Với LinearSVC dùng `decision_function` hoặc bọc `CalibratedClassifierCV` để có xác suất.
+
+2. **Bootstrap 1.000 lần** cho F1-macro, báo khoảng 2,5%–97,5%. Tập vàng chỉ 300 câu nên khoảng này sẽ rộng; nói rõ khi so hai mô hình chênh nhau ít.
+3. **Ma trận nhầm lẫn + chi phí.** Bài toán ưu tiên **Recall lớp neg**: bỏ sót một review chê (FN) = khách không được xử lý, có thể mất khách; báo nhầm (FP) = nhân viên mất 1 phút đọc. Đặt giả định, ví dụ `C_FN = 200.000đ` (giá trị đơn hàng tương lai bị mất), `C_FP = 2.000đ` (1 phút lương CSKH). Tính tổng chi phí của từng mô hình và của phương án "đọc tay toàn bộ".
+4. **ROI** (đưa lên P1.4):
+
+```
+Tiết kiệm/tháng = (thời gian đọc tay − thời gian chỉ đọc review bị gắn neg) × lương/giờ
+                  + (số review chê bắt được thêm × tỉ lệ giữ chân × giá trị khách hàng)
+                  − chi phí do FN, FP
+Chi phí        = triển khai ban đầu + vận hành (máy chủ, bảo trì)/tháng
+ROI            = (Tiết kiệm − Chi phí) / Chi phí
+```
+
+   Dùng số FN/FP thật từ ma trận nhầm lẫn, phóng theo 1.000 review/tháng. Làm bảng **phân tích độ nhạy** (lương, giá trị khách hàng ±50%).
+
+5. **SHAP** cho TF-IDF+LR:
+
+```python
+import shap
+vec, clf = best.named_steps["vec"], best.named_steps["clf"]
+Xg = vec.transform(gold.text_prep)
+explainer = shap.LinearExplainer(clf, vec.transform(train_texts), feature_names=vec.get_feature_names_out())
+sv = explainer(Xg)
+shap.plots.beeswarm(sv[:, :, 0], max_display=20)    # lớp neg
+shap.plots.waterfall(sv[i, :, 0])                    # giải thích 1 câu
+```
+
+   - Có từ nào là tên sản phẩm/thương hiệu lọt vào top không? Nếu có, đó là "lối tắt".
+   - Chọn 3 câu: một câu đúng, một câu sai, một câu có phủ định ("không đẹp lắm"). Có thể thêm `shap.Explainer` với pipeline của PhoBERT nếu kịp.
+
+6. **Đạo đức AI và fairness:**
+   - F1-macro **theo ngành hàng** trên tập vàng; ngành nào bị đoán kém?
+   - F1 trên văn bản **không dấu** (lấy từ thí nghiệm 4/11): người gõ không dấu, thường dùng điện thoại cũ hoặc lớn tuổi, có bị mô hình bất lợi không?
+   - Quyền riêng tư: dữ liệu không có tên người dùng; câu trích trong báo cáo đã ẩn danh; không lưu review mà người dùng nhập vào app.
+   - Dữ liệu Aug có thể do AI sinh: rủi ro mô hình học văn phong máy.
+   - **Human-in-the-loop:** câu có xác suất cao nhất < 0,6 hoặc dự đoán neu → chuyển nhân viên đọc. Báo bao nhiêu % câu vàng rơi vào nhóm này và F1 của phần còn lại.
+7. **Phân tích lỗi:** 20–30 câu sai, xếp nhóm: phủ định, mỉa mai, khía cạnh trái chiều, teencode/không dấu, câu chỉ mô tả.
+
+**Tự kiểm tra:** Vì sao ROC-AUC có thể cao trong khi F1 lớp neu thấp? Nếu giảm ngưỡng cho lớp neg thì Recall và chi phí thay đổi ra sao?
+
+**Đầu ra:** `figures/cm_*.png`, `figures/pr_curve.png`, `figures/shap_*.png`, bảng chi phí/ROI.
+**Ghi vào:** P1.4, P5.
+
+### 06/11 (T6): ABSA + phân tích kinh doanh. Mốc 2
+
+1. **ABSA bằng từ điển** (`src/aspects.py`), so khớp trên văn bản đã chuẩn hóa **chưa tách từ**:
 
 ```python
 ASPECTS = {
-    "giao_hang": ["giao hàng", "giao", "ship", "shipper", "vận chuyển", "đóng gói", "gói hàng", "nhận hàng", "hộp", "móp"],
+    "giao_hang": ["giao hàng", "giao", "shipper", "vận chuyển", "đóng gói", "gói hàng", "nhận hàng", "hộp", "móp"],
     "chat_luong": ["chất lượng", "chất liệu", "vải", "đường may", "bền", "hỏng", "hư", "lỗi", "mùi", "pin", "đúng mô tả", "size"],
     "gia_ca": ["giá", "rẻ", "đắt", "mắc", "tiền", "đáng tiền", "sale", "voucher"],
-    "dich_vu": ["shop", "cửa hàng", "tư vấn", "nhắn tin", "trả lời", "đổi trả", "bảo hành", "thái độ", "hỗ trợ"],
+    "dich_vu": ["cửa hàng", "tư vấn", "nhắn tin", "trả lời", "đổi trả", "bảo hành", "thái độ", "hỗ trợ"],
 }
 ```
 
-So khớp từ khóa trên văn bản **đã chuẩn hóa nhưng chưa tách từ** (`preprocess(s, segment=False)`), vì sau khi tách từ "giao hàng" sẽ thành "giao_hàng". Tách câu thành các mệnh đề (theo dấu chấm, dấu phẩy, "nhưng", "mà"). Mệnh đề nào chứa từ khóa của khía cạnh thì chạy mô hình cảm xúc tốt nhất trên mệnh đề đó. Mở rộng từ điển bằng `w2v.wv.most_similar("giao_hàng")`.
+   Lưu ý `preprocess` đã đổi "ship" → "giao hàng" và "shop" → "cửa hàng", nên từ điển dùng dạng đã đổi. Tách mệnh đề theo `.`, `,`, "nhưng", "mà"; mệnh đề chứa từ khóa thì chạy mô hình cảm xúc tốt nhất. Đánh giá trên 150 câu khía cạnh: F1 phát hiện khía cạnh, accuracy cảm xúc trên khía cạnh phát hiện đúng.
+2. Chạy mô hình cảm xúc + ABSA trên cả 2.548 review → `data/processed/shopee_predicted.csv`.
+3. Thống kê: tỉ lệ pos/neu/neg theo ngành hàng và sản phẩm; tỉ lệ tiêu cực theo khía cạnh; khía cạnh bị nhắc nhiều nhất trong review 1–2 sao; word cloud pos/neg và theo khía cạnh × neg.
+4. **Top 3 vấn đề**, mỗi vấn đề có số liệu, 2–3 câu trích ẩn danh, một hành động cụ thể.
 
-**Cách 2 (tùy chọn): Few-shot prompting** với một LLM. Đưa vào prompt 5–8 ví dụ đã gán nhãn, yêu cầu trả về JSON gồm 4 khía cạnh. Ghi rõ mô hình đã dùng, prompt và chi phí.
+**Đầu ra:** `src/aspects.py`, `shopee_predicted.csv`, hình kinh doanh.
+**Ghi vào:** P5 (kết quả ABSA), P6 (top 3 vấn đề).
 
-**Cách 3 (khuyến nghị nếu kịp, vì ViSD4SA có nhãn khía cạnh):**
-- Với mỗi khía cạnh `chat_luong`, `gia_ca`, `dich_vu`, huấn luyện một bộ phân loại 4 lớp (pos/neg/neu/none) trên các cột vừa tạo từ ViSD4SA. Có thể dùng TF-IDF+LR trước, rồi PhoBERT.
-- Khía cạnh `giao_hang` vẫn dùng từ điển.
-- Đánh giá trên cả ViSD4SA test (trong miền) và 200 câu Shopee gán tay (ngoài miền).
+### 07/11 (T7): Sản phẩm mẫu + demo + người dùng thật
 
-**Đánh giá** trên 200 câu đã gán khía cạnh: F1 phát hiện khía cạnh (có/không) cho từng khía cạnh, và accuracy cảm xúc trên những khía cạnh phát hiện đúng.
+Mức xuất sắc phần V yêu cầu: app chạy trơn tru, **người dùng nhập dữ liệu mới, chạy What-if, nhận kết quả tức thì kèm khuyến nghị**, có link online hoặc video 2–3 phút.
 
-#### 2/11 (T2): Chạy mô hình trên toàn bộ dữ liệu Shopee
-- Chạy mô hình cảm xúc và ABSA tốt nhất trên cả 2.548 review.
-- Thống kê:
-  - Tỉ lệ pos/neu/neg theo ngành hàng và theo sản phẩm.
-  - Tỉ lệ tiêu cực theo từng khía cạnh.
-  - Khía cạnh nào bị nhắc nhiều nhất trong các review 1–2 sao.
-- Lưu `data/processed/shopee_predicted.csv`.
+1. `app/dashboard.py` (Streamlit), 2 trang:
+   - **Phân tích review:** ô nhập 1 review hoặc tải CSV nhiều review → nhãn cảm xúc + xác suất + khía cạnh + các từ đóng góp nhiều nhất (SHAP/hệ số LR) + **khuyến nghị**. Ví dụ: neg + giao hàng → "Liên hệ đơn vị vận chuyển, gửi xin lỗi kèm voucher"; độ tin cậy thấp → "Chuyển nhân viên kiểm tra".
+   - **What-if:** sửa câu (thêm "không", bỏ dấu, đổi "giao nhanh" thành "giao chậm") và xem dự đoán đổi thế nào; thanh trượt ngưỡng neg → số review cần đọc tay và chi phí ước tính thay đổi theo.
+   - **Tổng quan:** lọc theo ngành hàng/sản phẩm, tỉ lệ cảm xúc, cột chồng theo khía cạnh, bảng câu trích tiêu cực.
+2. Dùng **TF-IDF+LR** trong app (nhẹ, chạy được trên Streamlit Community Cloud), lưu bằng `joblib`. PhoBERT nặng; nếu muốn đưa lên thì dùng Hugging Face Spaces.
+3. Deploy lên Streamlit Community Cloud (cần repo GitHub; **không đẩy dữ liệu có thông tin cá nhân**). Quay video 2–3 phút: nhập review → kết quả → What-if → tổng quan.
+4. **Điểm thưởng:** nhờ 3–5 người (ưu tiên người bán hàng online) dùng thử 10 phút, ghi phản hồi theo mẫu: dễ dùng (1–5), kết quả có đúng không, có dùng thật không, muốn thêm gì. Đưa bảng phản hồi vào P6.
 
-#### 3/11 (T3): Word cloud và dashboard
-- Vẽ word cloud riêng cho pos và cho neg, dùng văn bản đã tách từ và bỏ stopword. Nên làm thêm word cloud theo cặp khía cạnh × neg (ví dụ "giao hàng – tiêu cực").
-- Dashboard Streamlit (`app/dashboard.py`):
-  - Bộ lọc theo ngành hàng hoặc sản phẩm.
-  - Biểu đồ tỉ lệ cảm xúc.
-  - Biểu đồ cột chồng theo khía cạnh.
-  - Bảng câu trích tiêu cực.
-  - Ô nhập câu để dự đoán trực tiếp.
-- Chạy bằng `streamlit run app/dashboard.py` rồi chụp màn hình cho báo cáo.
+**Đầu ra:** `app/`, link app, video, bảng phản hồi người dùng, ảnh chụp giao diện.
+**Ghi vào:** P6.
 
-#### 4/11 (T4): Top 3 vấn đề cần cải thiện. Mốc 3
-Mỗi vấn đề cần có ba thứ:
-- **Số liệu**, ví dụ "38% review tiêu cực của nhóm thời trang nhắc tới size/chất liệu".
-- **2–3 câu trích thật**, đã ẩn danh.
-- **Một đề xuất hành động cụ thể**, ví dụ "thêm bảng size theo chiều cao/cân nặng vào trang sản phẩm".
+### 08/11 (CN): Viết báo cáo P1, P2, P3
 
-Nếu còn thời gian, làm thêm điểm nhấn: TextCNN bằng PyTorch, hoặc ABSA bằng PhoBERT.
+- Tạo `bao_cao.qmd` với YAML ở mục 2, render thử ngay một trang để chắc XeLaTeX và tiếng Việt chạy được.
+- Viết trang bìa, bảng phân công, danh mục từ viết tắt.
+- Viết P1 (Persona, Empathy Map, SMART, ROI), P2 (CRISP-DM), P3.
+- Tạo `references.bib`, tải `apa.csl`.
 
----
+### 09/11 (T2): Viết P4, P5, P6
 
-### Chặng 4: Báo cáo (5/11 – 11/11), giữ nguyên lịch cũ
+- Mỗi hình/bảng có số, chú thích, câu nhận xét kinh doanh.
+- Chương kết luận gộp vào P6.3: hạn chế (tập vàng 300 câu, một người gán, nhãn sao là nhãn yếu, 32 sản phẩm, Aug có thể do AI sinh, PhoBERT không CV) và hướng phát triển.
 
-| Ngày | Việc |
-|---|---|
-| 5/11 | Viết hoàn chỉnh Chương 5 (kết quả) và Chương 6 (kinh doanh) |
-| 6/11 | Chương 1, 2, 7 và Tóm tắt |
-| 7/11 | Ghép báo cáo, đánh số hình/bảng, tài liệu tham khảo, kiểm tra ≤ 30 trang |
-| 8/11 | Đọc lại; **chạy lại toàn bộ notebook từ đầu** để chắc chắn tái lập được |
-| 9/11 | Slide; đóng gói bài nộp (báo cáo, notebook, dashboard, slide) |
-| 10/11 | Dự phòng |
-| 11/11 | Nộp sớm trong ngày |
+### 10/11 (T3): Hoàn thiện và đóng gói
 
-**Chỉnh nội dung báo cáo cho khớp dữ liệu mới:**
-- **Chương 3:**
-  - Đổi "Tiki" thành "Shopee".
-  - Mô tả 3 nguồn theo bảng ở mục 0 và bảng số dòng sau từng bước làm sạch (2.843 → 2.548).
-  - Nêu lý do chia theo sản phẩm.
-  - Nêu rằng JSONL là dữ liệu tăng cường không dấu, chỉ dùng để huấn luyện.
-  - Đưa bảng chéo nhãn tay với số sao.
-- **Chương 5:** tách rõ ba loại đánh giá:
-  - (a) Trong miền.
-  - (b) Ngoài miền thật: train A, test trên tập vàng Shopee.
-  - (c) Khác sản phẩm, cùng nền tảng: train B, test trên tập vàng.
-- **Chương 7, hạn chế:**
-  - Tập vàng nhỏ (500 câu) và chỉ có một người gán, nếu bạn làm một mình.
-  - Nhãn sao là nhãn yếu.
-  - Dữ liệu Shopee chỉ gồm 32 sản phẩm.
-  - Dữ liệu Aug có thể do AI sinh.
+1. **Restart & Run All** từng notebook theo thứ tự, sửa cell lỗi, xóa cell nháp, thêm markdown giải thích mục đích từng đoạn.
+2. `quarto render bao_cao.qmd --to pdf`; kiểm tra **≤ 45 trang** không tính phụ lục code.
+3. Đọc lại chính tả; kiểm tra chú thích bảng ở trên, hình ở dưới; mọi tài liệu đều được trích.
+4. Viết Tuyên bố sử dụng AI.
+5. `pip freeze > code/requirements.txt`; viết `README.md` gốc (cách chạy, thứ tự notebook, link dữ liệu, link demo).
+6. Đóng gói `.zip` theo cấu trúc mục 2 và tick checklist mục 6.
+
+### 11/11 (T4): Dự phòng. **Nộp trước 23:59**, nên nộp trước trưa.
 
 ---
 
-## 3. Nếu chậm tiến độ, cắt theo thứ tự
+## 5. Nếu chậm tiến độ, cắt theo thứ tự
 
-1. Điểm nhấn (TextCNN, ABSA bằng PhoBERT).
-2. Few-shot prompting ABSA, chỉ giữ cách từ điển.
-3. Thí nghiệm không dấu.
-4. Word2Vec (vẫn còn BoW, TF-IDF, PhoBERT là đủ 3 phương pháp).
+1. SHAP cho PhoBERT (giữ SHAP cho LR).
+2. Word2Vec (vẫn còn LR, LinearSVC, TF-IDF+đặc trưng, PhoBERT là đủ ≥ 3 mô hình nâng cao).
+3. Trang Tổng quan của dashboard (giữ trang Phân tích review + What-if).
+4. Thí nghiệm tiền xử lý 4 biến thể (giữ 2: thô và đầy đủ).
+5. ABSA đánh giá trên 150 câu (giữ chạy trên toàn bộ để phân tích kinh doanh, ghi rõ chưa đánh giá định lượng).
 
-**Không cắt:** tập vàng 500 câu, đánh giá trên tập vàng, phân tích lỗi, chia theo sản phẩm.
+**Không cắt:** tập vàng 300 câu, chia theo sản phẩm, GroupKFold + GridSearch, learning curve, ROC/PR-AUC + chi phí ma trận nhầm lẫn, SHAP cho LR, mục đạo đức, demo có What-if, video/link, Quarto PDF.
 
-## 4. Phương án cào bổ sung (chỉ khi giảng viên yêu cầu tự cào)
+---
 
-Dành 1–2 ngày, đặt vào 23–24/10 và dời phần tiền xử lý sang các buổi tối:
-- Cào 1.000–2.000 review Tiki của 2 ngành hàng **khác** với 32 sản phẩm hiện có, tối đa 200 review mỗi sản phẩm.
-- Dùng `requests`, nghỉ 1–2 giây giữa các request, tôn trọng robots.txt, ẩn danh tên người dùng.
-- Dữ liệu này bổ sung cho phân tích kinh doanh và làm tập đánh giá ngoài miền thứ hai. Bạn có thể lấy 100–200 câu để gán nhãn nhanh.
+## 6. Checklist trước khi nộp (theo PDF)
 
-## 5. Lỗi thường gặp (bản cho dataset này)
+- [ ] Báo cáo viết bằng `.qmd`, render thành công sang PDF
+- [ ] ≤ 45 trang (không tính code); `echo: false`
+- [ ] Trang bìa, bảng phân công + % đóng góp, mục lục, danh mục từ viết tắt, bảng, hình
+- [ ] Mọi hình/bảng có số, tiêu đề và nhận xét kinh doanh
+- [ ] Có cả `.qmd` và `.pdf`
+- [ ] Notebook đã Restart & Run All, lưu cả output
+- [ ] Link web app online hoặc video demo 2–3 phút
+- [ ] Trích dẫn nguồn dữ liệu và tài liệu tham khảo (APA)
+- [ ] Tuyên bố sử dụng AI
+- [ ] File `.zip` đúng tên `[Nhom_XX]_[MaDeTai]_[TenDeTai].zip`
+- [ ] Nộp trước 23:59 ngày 11/11/2026
 
-- Quên bỏ dòng rác "Tổng quan… Trợ lý AI tổng hợp": đó là văn bản do AI của sàn viết, không phải review của người mua.
-- Chia ngẫu nhiên từng dòng, khiến cùng một sản phẩm khăn ướt có mặt cả trong train lẫn test.
-- Đưa câu JSONL vào tập test, hoặc gộp JSONL 2 lớp với dữ liệu 3 lớp mà không nói rõ.
-- Dùng số sao làm nhãn test, rồi lại báo đó là "độ chính xác".
-- Xóa từ "không" khi bỏ stopword.
-- Quên tách từ trước khi đưa văn bản vào PhoBERT.
-- Chỉ báo accuracy. Lớp neu chỉ chiếm ~10%, nên accuracy che mất lỗi.
+---
+
+## 7. Lỗi thường gặp
+
+- Quên bỏ dòng rác "Tổng quan… Trợ lý AI tổng hợp" (văn bản do AI của sàn viết, không phải review).
+- Chia ngẫu nhiên từng dòng, hoặc dùng `KFold` thường, khiến cùng một sản phẩm nằm ở cả train lẫn test/val.
+- Đưa câu Aug vào tập test, hoặc gộp Aug 2 lớp với dữ liệu 3 lớp mà không nói rõ.
+- Dùng số sao làm nhãn test rồi gọi đó là "độ chính xác".
+- Xóa "không" khi bỏ stopword; quên tách từ trước khi đưa vào PhoBERT.
+- Chỉ báo accuracy; chỉ báo ROC-AUC mà không có PR-AUC khi lớp lệch.
+- Tuning trên chính tập vàng (tập vàng **chỉ dùng để đánh giá cuối cùng**; chọn tham số bằng CV trên train hoặc ViSD4SA dev).
+- Biểu đồ không có nhận xét kinh doanh; bảng/hình không đánh số.
+- ROI đưa số mà không ghi đâu là giả định.
+- Chạy mô hình trong `.qmd` khiến render lâu và dễ lỗi.
+- Đẩy dữ liệu hoặc khóa API lên GitHub công khai khi deploy app.
