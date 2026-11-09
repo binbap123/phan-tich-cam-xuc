@@ -61,6 +61,7 @@ Một câu có thể có nhiều khía cạnh với cảm xúc trái nhau. Ví d
 ## 5. Quy tắc thêm trong lúc gán
 
 - *(ghi thêm ở đây)*
+- Với `test_moi_200.xlsx` (06/11): gán `sentiment` cho cả 200 câu, 4 cột khía cạnh chỉ gán ở dòng `gan_khia_canh = có` (100 câu đầu). Không hỏi AI, không mở file key. Dùng file này để đánh giá.
 
 ## 6. Đo độ đồng thuận
 

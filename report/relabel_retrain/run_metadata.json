@@ -1,0 +1,27 @@
+{
+  "n_relabel": 244,
+  "n_drop_rac": 6,
+  "label_changed_vs_weak": 178,
+  "nguon": {
+    "dong_y_claude": 199,
+    "nguoi_dung_sua": 50,
+    "dien_giai_ghi_chu": 1
+  },
+  "dien_giai": {
+    "chủ yếu chê dịch vụ": "neg"
+  },
+  "B_labels_old": {
+    "pos": 1165,
+    "neg": 437,
+    "neu": 192
+  },
+  "B_labels_new": {
+    "pos": 1153,
+    "neg": 591,
+    "neu": 44
+  },
+  "notes": [
+    "Gold labels were seen before this experiment; gold numbers are exploratory.",
+    "Parameters are copied from the saved AB models; nothing was tuned."
+  ]
+}

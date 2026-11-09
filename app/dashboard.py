@@ -14,7 +14,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.aspects import absa
+from src.aspects import absa, top_negative_keywords
 from src.data import ASPECTS, load_gold
 from src.preprocess import preprocess, strip_accents
 
@@ -36,6 +36,9 @@ ACTIONS = {
 
 @st.cache_resource
 def load_model():
+    # underthesea nạp mô hình tách từ lúc gọi lần đầu và không an toàn đa luồng.
+    # Gọi ở đây vì cache_resource bắt các lượt chạy song song phải chờ nạp xong.
+    preprocess("khởi tạo")
     return joblib.load(ROOT / "models" / "tfidf_lr_AB.joblib")
 
 
@@ -48,7 +51,12 @@ def load_predicted():
 def gold_scores():
     gold, temp = load_gold()
     p = load_model().predict_proba(gold[["text_prep", "text_raw"]])
-    return gold[["rating", "label"]].assign(p_neg=p[:, 0]), temp
+    # Tập vàng lấy dư review 1–3 sao: trọng số đưa tỉ lệ sao về đúng toàn bộ review (notebook 09).
+    star = pd.read_csv(ROOT / "data" / "processed" / "shopee_clean_all.csv").rating.value_counts(normalize=True)
+    w = gold.rating.map(star / gold.rating.value_counts(normalize=True))
+    pb = pd.read_csv(ROOT / "report" / "phobert" / "phobert_gold_pool_proba.csv").set_index("id").loc[gold.id]
+    pb_not_pos = pb[["p_neg", "p_neu", "p_pos"]].values.argmax(1) != 2
+    return gold[["rating", "label"]].assign(p_neg=p[:, 0], w=(w / w.sum()).values, pb_not_pos=pb_not_pos), temp
 
 
 def predict(texts):
@@ -85,7 +93,7 @@ def recommend(label, aspects, conf):
 
 st.title("💬 Phân tích cảm xúc đánh giá sản phẩm")
 st.caption("Mô hình: TF-IDF + Logistic Regression, huấn luyện trên ViSD4SA + Shopee. "
-           "ABSA 4 khía cạnh bằng từ điển + mô hình cảm xúc trên từng mệnh đề.")
+           "ABSA 4 khía cạnh bằng từ điển, luật từ khóa chê và mô hình cảm xúc trên từng mệnh đề.")
 tab1, tab2, tab3 = st.tabs(["🔎 Phân tích review", "🧪 What-if", "📊 Tổng quan Shopee"])
 
 # ---------------------------------------------------------------- Tab 1
@@ -168,18 +176,24 @@ with tab2:
     c_read = c2.number_input("Chi phí đọc 1 review (đ)", 0, 50_000, 1_000, step=500)
     c_miss = c3.number_input("Thiệt hại khi bỏ sót 1 lời chê (đ)", 0, 1_000_000, 50_000, step=10_000)
     t = c4.slider("Ngưỡng P(tiêu cực)", 0.05, 0.95, 0.35, 0.05)
+    st.caption("Tính trên tập vàng, đã hiệu chỉnh theo tỉ lệ sao thực tế. Chi phí là giả định, hãy nhập số của shop bạn. "
+               "Mọi so sánh ở đây là phân tích thăm dò vì tập vàng đã được xem khi phát triển, "
+               "chưa được kiểm chứng trên dữ liệu mới.")
     is_neg = (gs.label == "neg").values
-    scale = n / len(gs)
+    w = gs.w.values
 
     def cost(flag):
-        fn = (is_neg & ~flag).sum()
-        return {"Review phải đọc": flag.sum() * scale, "Lời chê bị bỏ sót": fn * scale,
-                "Recall tiêu cực": (is_neg & flag).sum() / max(is_neg.sum(), 1),
-                "Tổng chi phí/tháng (đ)": flag.sum() * scale * c_read + fn * scale * c_miss}
+        read, fn = w[flag].sum() * n, w[is_neg & ~flag].sum() * n
+        return {"Review phải đọc": read, "Lời chê bị bỏ sót": fn,
+                "Recall tiêu cực": w[is_neg & flag].sum() / max(w[is_neg].sum(), 1e-9),
+                "Tổng chi phí/tháng (đ)": read * c_read + fn * c_miss}
 
+    sao_13 = (gs.rating <= 3).values
     table = pd.DataFrame({"Đọc tay toàn bộ": cost(np.ones(len(gs), bool)),
                           "Lọc theo sao (1–2 sao)": cost((gs.rating <= 2).values),
-                          f"Mô hình (P ≥ {t:.2f})": cost(gs.p_neg.values >= t)}).T
+                          "Lọc theo sao (1–3 sao)": cost(sao_13),
+                          f"TF-IDF+LR (P ≥ {t:.2f})": cost(gs.p_neg.values >= t),
+                          "Ghép: ≤ 3 sao hoặc PhoBERT không đoán tích cực": cost(sao_13 | gs.pb_not_pos.values)}).T
     st.dataframe(table.style.format({"Review phải đọc": "{:,.0f}", "Lời chê bị bỏ sót": "{:,.0f}",
                                      "Recall tiêu cực": "{:.0%}", "Tổng chi phí/tháng (đ)": "{:,.0f}"}),
                  width="stretch")
@@ -216,6 +230,15 @@ with tab3:
     c2.plotly_chart(px.bar(agg, x="Khía cạnh", y="count", color="Cảm xúc", color_discrete_map=COLORS,
                            title="Cảm xúc theo khía cạnh", height=330, labels={"count": "Số mệnh đề"}),
                     width="stretch")
+    st.markdown("**Top từ khóa trong review mô hình dự đoán tiêu cực**")
+    kw = top_negative_keywords(df)
+    if len(kw):
+        fig = px.bar(kw.iloc[::-1], x="Số review chê", y="Từ khóa", orientation="h", height=420,
+                     hover_data=["Tỉ lệ chê"], color_discrete_sequence=[COLORS["Tiêu cực"]])
+        fig.update_layout(margin=dict(t=10, b=10))
+        st.plotly_chart(fig, width="stretch")
+    else:
+        st.write("Nhóm đang chọn có quá ít review chê để thống kê từ khóa.")
     st.markdown("**Review tiêu cực nổi bật**")
     st.dataframe(df[df.pred == "neg"].sort_values("p_neg", ascending=False)
                  [["category", "rating", "p_neg", "text_clean"] + ASPECTS].head(50),

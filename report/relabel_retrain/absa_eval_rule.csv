@@ -1,0 +1,9 @@
+﻿model,aspect,n_true,precision,recall,f1_detect,acc_sentiment
+TF-IDF+LR AB,giao_hang,64,0.688,0.859,0.764,0.836
+TF-IDF+LR AB,chat_luong,180,0.958,0.633,0.763,0.658
+TF-IDF+LR AB,gia_ca,30,0.531,0.867,0.658,0.923
+TF-IDF+LR AB,dich_vu,54,0.519,0.741,0.611,0.7
+TF-IDF+LR AB_relabel,giao_hang,64,0.688,0.859,0.764,0.836
+TF-IDF+LR AB_relabel,chat_luong,180,0.958,0.633,0.763,0.667
+TF-IDF+LR AB_relabel,gia_ca,30,0.531,0.867,0.658,0.885
+TF-IDF+LR AB_relabel,dich_vu,54,0.519,0.741,0.611,0.75

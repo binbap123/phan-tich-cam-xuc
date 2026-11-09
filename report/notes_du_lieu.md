@@ -4,8 +4,8 @@ Số liệu lấy từ `notebook/01_eda.ipynb` và `notebook/02_clean_split.ipyn
 
 ## 1. Câu trả lời của giảng viên
 
-- Dataset tải về có được tính điểm tự cào không: *(chưa hỏi / điền vào đây)*
-- Phụ lục có tính vào giới hạn 30 trang không: *(chưa hỏi / điền vào đây)*
+- Chưa có xác nhận của giảng viên về cách tính điểm nguồn Shopee có sẵn. Báo cáo mô tả dùng tệp CSV trong dự án, không tuyên bố đã tự cào dữ liệu.
+- PDF rubric ngày 23/10 quy định tối đa 45 trang, không tính code/mã nguồn. Không còn dùng mốc 30 trang của hướng dẫn phụ; PDF không nêu miễn trừ toàn bộ phụ lục.
 
 ## 2. Ba nguồn dữ liệu
 
@@ -42,4 +42,11 @@ Nếu mô hình đoán "pos" cho mọi câu Shopee, accuracy là 0,689 nhưng F1
 - Có 2 tên sản phẩm Shopee lưu ở dạng NFD (áo bra, bình giữ nhiệt). Đã chuẩn hóa NFC trước khi chia và ghép bảng ngành hàng.
 - Aug: file hiện có 1.347 dòng (hướng dẫn ghi 1.348), nên sau khi lọc còn 1.205 thay vì 1.206. 55 dòng có `*`, tab hoặc dấu `"` thừa, đã thay bằng khoảng trắng.
 - Bảng sản phẩm → ngành hàng: `data/processed/product_category.csv`, gồm 9 ngành. Ngành do Claude gán theo từ khóa trong tên sản phẩm, **cần bạn kiểm tra lại**.
-- 3 ví dụ review 4–5 sao mà nội dung lại chê: *(chọn từ danh sách ở `01_eda.ipynb`, mục 2)*
+- Ví dụ review 4–5 sao có lời chê (đối chiếu `data/processed/shopee_predicted.csv`, bổ sung 08/11):
+  - `shp_1413`, 4 sao: “đúng đúng đúng Khó chỉnh giờ”.
+  - `shp_1450`, 5 sao: “đúng đúng Nhưng không chỉ cách chỉnh giờ ai biết chỉ mình với”.
+  - `shp_2329`, 5 sao: “giao hàng nhanh, nước hoa thì mùi ko vừa ý cho lắm”.
+
+## Cập nhật bản thảo ngày 08/11
+
+Các thống kê ở trên mô tả phiên bản chuẩn bị dữ liệu ban đầu. Kết quả chính hiện tại đọc từ `report/main_results.csv`; nhãn train Shopee có gán lại, còn word cloud EDA dùng nhãn sao ban đầu. Mọi phân tích trên tập vàng đã xem đều là thăm dò. Báo cáo và ô nhận xét notebook đã được Codex hỗ trợ viết; nhóm cần duyệt trước khi nộp.

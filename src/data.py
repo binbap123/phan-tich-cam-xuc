@@ -20,8 +20,12 @@ def _visd(split):
 
 
 def load_sets():
-    """Trả về dict: A, A_dev, A_test (ViSD4SA), B (Shopee train, nhãn sao), Aug (không dấu)."""
-    B = (pd.read_csv(P / "shopee_train.csv")
+    """Trả về dict: A, A_dev, A_test (ViSD4SA), B (Shopee train), Aug (không dấu).
+
+    B lấy nhãn sao, trừ 250 review 3–4 sao đã gán tay lại (Claude đề xuất, người dùng duyệt;
+    6 câu rác bị bỏ). File tạo bởi scripts/retrain_relabel.py, nhãn ở labeling/train_250_nhan.csv.
+    """
+    B = (pd.read_csv(P / "shopee_train_relabel.csv")
          .rename(columns={"text_clean": "text_raw", "weak_label": "label", "product": "group"}))
     Aug = (pd.read_csv(P / "aug_train.csv")
            .drop(columns="label").rename(columns={"text": "text_raw", "weak_label": "label"})
@@ -63,6 +67,8 @@ def load_gold(min_rows=50):
         for a in ASPECTS:
             g[a] = g[a].astype("string").str.strip().str.lower()
         gold = g.drop(columns=["text"]).merge(meta, on="id")
+        # Đổi về object: cột "string" cho .values là mảng Arrow, không dùng được như numpy.
+        gold["sentiment"] = gold.sentiment.astype(object)
         return gold.rename(columns={"text_clean": "text_raw", "sentiment": "label"}), False
 
     gold = meta.rename(columns={"text_clean": "text_raw", "weak_label": "label"})

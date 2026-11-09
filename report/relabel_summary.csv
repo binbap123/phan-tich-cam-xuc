@@ -1,0 +1,21 @@
+﻿Mô hình,Nhãn train,Tập,F1-macro,F1 neg,Recall neg
+BoW+NB,Nhãn sao,Vàng Shopee (thăm dò),0.568,0.804,0.744
+BoW+NB,Nhãn sao,ViSD4SA test,0.595,0.848,0.902
+BoW+NB,Nhãn gán lại,Vàng Shopee (thăm dò),0.583,0.831,0.81
+BoW+NB,Nhãn gán lại,ViSD4SA test,0.585,0.848,0.901
+TF-IDF+LR,Nhãn sao,Vàng Shopee (thăm dò),0.601,0.771,0.694
+TF-IDF+LR,Nhãn sao,ViSD4SA test,0.713,0.869,0.918
+TF-IDF+LR,Nhãn gán lại,Vàng Shopee (thăm dò),0.619,0.83,0.826
+TF-IDF+LR,Nhãn gán lại,ViSD4SA test,0.717,0.872,0.923
+TF-IDF+LinearSVC,Nhãn sao,Vàng Shopee (thăm dò),0.607,0.802,0.719
+TF-IDF+LinearSVC,Nhãn sao,ViSD4SA test,0.708,0.875,0.921
+TF-IDF+LinearSVC,Nhãn gán lại,Vàng Shopee (thăm dò),0.598,0.819,0.802
+TF-IDF+LinearSVC,Nhãn gán lại,ViSD4SA test,0.705,0.876,0.92
+TF-IDF+features+LR,Nhãn sao,Vàng Shopee (thăm dò),0.607,0.785,0.694
+TF-IDF+features+LR,Nhãn sao,ViSD4SA test,0.707,0.882,0.917
+TF-IDF+features+LR,Nhãn gán lại,Vàng Shopee (thăm dò),0.603,0.831,0.81
+TF-IDF+features+LR,Nhãn gán lại,ViSD4SA test,0.707,0.877,0.914
+PhoBERT,Nhãn sao,Vàng Shopee (thăm dò),0.617,0.716,0.595
+PhoBERT,Nhãn sao,ViSD4SA test,0.808,0.928,0.914
+PhoBERT,Nhãn gán lại,Vàng Shopee (thăm dò),0.704,0.858,0.851
+PhoBERT,Nhãn gán lại,ViSD4SA test,0.779,0.925,0.923
