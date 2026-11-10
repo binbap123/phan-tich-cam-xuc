@@ -53,6 +53,6 @@ Nếu Quarto không tìm đúng Python, đặt biến môi trường `QUARTO_PYT
 ## Nguồn dữ liệu
 
 - **UIT-ViSD4SA:** review điện thoại có nhãn khía cạnh và cảm xúc (Phan và cộng sự, 2021).
-- **Shopee:** 2.843 review của 32 sản phẩm, trong `data/final_train_dataset.csv`.
-- **Không dấu:** 1.347 review trong `data/aug_unaccented_reviews.jsonl`, có thể do AI sinh, chỉ dùng để train.
+- **Shopee:** 2.843 review của 32 sản phẩm, trong `data/final_train_dataset.csv`, lấy từ bộ dữ liệu Kaggle [Shopee and tiki reviews _ vietnamese version](https://www.kaggle.com/datasets/khngxuninh/shopee-and-tiki-reviews-vietnamese-version) (tài khoản `khngxuninh`; không có mô tả cách thu thập, giấy phép ghi Unknown; có lẫn một số review nhắc Tiki).
+- **Không dấu:** 1.347 review trong `data/aug_unaccented_reviews.jsonl`, lấy từ bộ dữ liệu Kaggle [Shopee Vietnamese Product Reviews Sentiment](https://www.kaggle.com/datasets/dduongdev/shopee-vietnamese-product-reviews-sentiment) (Duong Nguyen, Apache 2.0). Đây là mẫu tổng hợp sinh từ review Shopee.vn, chưa rõ cách sinh, nên chỉ dùng để train.
 - **Tập vàng:** 300 câu Shopee do người thực hiện đồ án tự gán nhãn, trong `labeling/gold_500.csv`.

@@ -81,7 +81,13 @@ check("Demo", "app có top từ khóa tiêu cực", "top_negative_keywords" in a
 demo = (ROOT / "demo" / "README.md").read_text(encoding="utf-8")
 check("Demo", "có link app", "[dán link" not in demo)
 check("Báo cáo", "có link app", "[dán link" not in body)
-check("Đề", "word cloud có đủ 3 lớp", 'Oranges' in (ROOT / "notebook" / "05_eda_bosung.ipynb").read_text(encoding="utf-8"))
+nb05 = json.loads((ROOT / "notebook" / "05_eda_bosung.ipynb").read_text(encoding="utf-8"))
+wc_cells = ["".join(c["source"]) for c in nb05["cells"]
+            if c["cell_type"] == "code" and "WordCloud(" in "".join(c["source"])]
+du_3_lop = any(all(f'"{lab}"' in s for lab in ("neg", "neu", "pos")) for s in wc_cells)
+co_hinh = (ROOT / "figures" / "eda_wordcloud.png").exists() and "eda_wordcloud.png" in body
+check("Đề", "word cloud có đủ 3 lớp", du_3_lop and co_hinh,
+      f"ô vẽ đủ neg/neu/pos: {du_3_lop}; hình có trong báo cáo: {co_hinh}")
 
 # File nộp
 for f in ["README.md", "requirements.txt", "report/references.bib", "report/apa.csl"]:
