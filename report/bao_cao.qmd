@@ -1,5 +1,5 @@
 ---
-title: "Ứng dụng Học máy và Xử lý Ngôn ngữ Tự nhiên trong Phân tích Cảm xúc Đánh giá Sản phẩm Thương mại Điện tử"
+title: "Ứng dụng học máy và xử lý ngôn ngữ tự nhiên trong phân tích cảm xúc đánh giá sản phẩm thương mại điện tử"
 subtitle: "Học phần Trí tuệ Nhân tạo Ứng dụng & Khoa học Dữ liệu"
 author: "Nhóm 12: Đoàn Nguyễn Đăng Khoa – 2403700332"
 date: "2026-11-11"
@@ -23,6 +23,37 @@ format:
     include-in-header:
       text: |
         \babelprovide[main,import]{vietnamese}
+        \renewcommand{\maketitle}{%
+          \begin{titlepage}
+          \centering
+          {\large\bfseries TRƯỜNG ĐẠI HỌC QUẢN LÝ VÀ CÔNG NGHỆ TP.HCM (UMT)\par}
+          \vspace{0.2cm}
+          {\large\bfseries KHOA CÔNG NGHỆ\par}
+          \vspace{0.3cm}
+          \rule{0.5\textwidth}{0.6pt}\par
+          \vspace{2.2cm}
+          {\large ĐỒ ÁN CUỐI KHÓA\par}
+          \vspace{0.3cm}
+          {\large Học phần: Trí tuệ Nhân tạo Ứng dụng \& Khoa học Dữ liệu\par}
+          \vspace{0.2cm}
+          {\normalsize Mã đề tài: Project 09\par}
+          \vspace{2cm}
+          {\LARGE\bfseries Ứng dụng học máy và xử lý ngôn ngữ tự nhiên\\[0.2cm]
+          trong phân tích cảm xúc đánh giá sản phẩm\\[0.2cm]
+          thương mại điện tử\par}
+          \vspace{2.5cm}
+          {\large
+          \begin{tabular}{ll}
+          \textbf{Giảng viên hướng dẫn:} & Trần Mạnh Tường \\[0.25cm]
+          \textbf{Sinh viên thực hiện:} & Đoàn Nguyễn Đăng Khoa \\[0.25cm]
+          \textbf{Mã số sinh viên:} & 2403700332 \\[0.25cm]
+          \textbf{Nhóm:} & 12 (thực hiện cá nhân) \\
+          \end{tabular}\par}
+          \vfill
+          {\large TP. Hồ Chí Minh, năm học 2026–2027\par}
+          \end{titlepage}
+          \setcounter{page}{1}%
+        }
 bibliography: references.bib
 csl: apa.csl
 execute:
@@ -52,6 +83,8 @@ def tbl(path, index=False, floatfmt=".3f", **kw):
 # Thông tin chung {.unnumbered}
 
 **Trường:** Trường Đại học Quản lý và Công nghệ TP.HCM (UMT). **Khoa:** Khoa Công nghệ. **Năm:** 2026. **Mã đề tài:** Project 09.
+
+**Giảng viên hướng dẫn:** Trần Mạnh Tường.
 
 Đồ án do sinh viên thực hiện cá nhân.
 
@@ -267,7 +300,7 @@ Shopee được chia theo sản phẩm để review của cùng một mặt hàn
 
 Đặc trưng mới gồm độ dài log, số từ phủ định, số từ đối lập, dấu chấm than, tỷ lệ chữ hoa và tỷ lệ ký tự có dấu. Hiệu quả phải kiểm tra bằng CV, không suy từ tương quan. Tiền xử lý chuẩn hóa Unicode, teencode, ký tự lặp, đổi emoji thành token và tách từ; từ phủ định được giữ ở biến thể bỏ stopword.
 
-Theo @tbl-preprocess, F1-macro ViSD4SA test lần lượt là 0,713 (thô), 0,713 (chuẩn hóa), 0,717 (thêm tách từ) và 0,726 (thêm bỏ stopword). Trên vàng Shopee: 0,608; 0,637; 0,619; 0,588. Ablation này dùng cấu hình riêng của notebook 07, không phải kết quả sau tuning notebook 06. Có thể thấy cùng một bước tiền xử lý nhưng tác động lên hai miền dữ liệu lại khác nhau. Pipeline không được chọn lại dựa trên điểm vàng hay điểm test. Tập vàng chỉ một người gán nên còn hạn chế về độ tin cậy.
+Theo @tbl-preprocess, F1-macro ViSD4SA test lần lượt là 0,713 (thô), 0,713 (chuẩn hóa), 0,720 (thêm tách từ) và 0,727 (thêm bỏ stopword). Trên vàng Shopee: 0,608; 0,637; 0,619; 0,591. Ablation này dùng cấu hình riêng của notebook 07, không phải kết quả sau tuning notebook 06. Có thể thấy cùng một bước tiền xử lý nhưng tác động lên hai miền dữ liệu lại khác nhau. Pipeline không được chọn lại dựa trên điểm vàng hay điểm test. Tập vàng chỉ một người gán nên còn hạn chế về độ tin cậy.
 
 ### Gán lại nhãn cho review 3–4 sao
 
@@ -330,9 +363,9 @@ Markdown(d.pivot(index="model", columns="train", values="F1_gold").to_markdown(f
 tbl("word2vec_results.csv")
 ```
 
-Trên ViSD4SA test, thêm A vào B làm F1-macro TF-IDF+LR tăng từ 0,510 lên 0,724; trên vàng Shopee gần như không tăng (0,608 và 0,605). Đây là khác biệt miền/phân bố nhãn, không chứng minh thêm dữ liệu luôn tốt. Kết quả Aug chỉ là ablation, không dùng thay mô hình chính theo điểm vàng.
+Trên ViSD4SA test, thêm A vào B làm F1-macro TF-IDF+LR tăng từ 0,510 lên 0,720; trên vàng Shopee gần như không tăng (0,608 và 0,612). Đây là khác biệt miền/phân bố nhãn, không chứng minh thêm dữ liệu luôn tốt. Kết quả Aug chỉ là ablation, không dùng thay mô hình chính theo điểm vàng.
 
-Word2Vec+LR chọn C=0,1 dựa trên ViSD4SA dev (F1-macro 0,633), đạt 0,630 trên ViSD4SA test và 0,624 trên vàng Shopee (thăm dò). Trên ViSD4SA test, kết quả này kém TF-IDF+LR. Một lý do có thể là khi lấy trung bình vector, thứ tự từ và từ phủ định bị mất, nhưng thí nghiệm chưa tách riêng để kiểm chứng. Điểm vàng không được dùng để chọn C.
+Word2Vec+LR chọn C=1 dựa trên ViSD4SA dev (F1-macro 0,635, bằng C=10; khi hòa thì chọn C nhỏ hơn, tức điều chuẩn mạnh hơn), đạt 0,629 trên ViSD4SA test và 0,620 trên vàng Shopee (thăm dò). Trên ViSD4SA test, kết quả này kém TF-IDF+LR. Một lý do có thể là khi lấy trung bình vector, thứ tự từ và từ phủ định bị mất, nhưng thí nghiệm chưa tách riêng để kiểm chứng. Điểm vàng không được dùng để chọn C.
 
 # Đánh giá chuyên sâu, giải thích mô hình và đạo đức AI
 
@@ -355,7 +388,7 @@ tbl("bootstrap_ci.csv")
 
 Recall tiêu cực được chọn làm chỉ số nghiệp vụ chính vì nó cho biết mô hình tìm ra được bao nhiêu phần lời chê. Tuy nhiên Recall có thể tăng rất dễ nếu mô hình gán tiêu cực cho quá nhiều câu hoặc bỏ mặc lớp trung lập, nên F1-macro luôn được báo kèm. Accuracy ít ý nghĩa ở đây vì bị lớp đông nhất chi phối. PR-AUC cho thấy Precision và Recall đánh đổi nhau thế nào khi thay ngưỡng; ROC-AUC OvR và các chỉ số macro giúp nhìn thêm khả năng phân biệt cả ba lớp.
 
-Trên vàng Shopee, PhoBERT có Recall tiêu cực 0,851, F1-macro 0,704, Accuracy 0,837. TF-IDF+LR dùng trong dashboard có Recall tiêu cực 0,826, F1-macro 0,605; không gán điểm PhoBERT cho app chạy LR. Trên ViSD4SA test, PhoBERT đạt F1-macro 0,779, LR đạt 0,724. Mục tiêu 0,75 chỉ đạt ở PhoBERT trên ViSD4SA test.
+Trên vàng Shopee, PhoBERT có Recall tiêu cực 0,851, F1-macro 0,704, Accuracy 0,837. TF-IDF+LR dùng trong dashboard có Recall tiêu cực 0,835, F1-macro 0,612; không gán điểm PhoBERT cho app chạy LR. Trên ViSD4SA test, PhoBERT đạt F1-macro 0,779, LR đạt 0,720. Mục tiêu 0,75 chỉ đạt ở PhoBERT trên ViSD4SA test.
 
 Xét tiêu cực là lớp cảnh báo: dương tính giả là review không tiêu cực bị đưa cho nhân viên đọc; âm tính giả là lời chê bị bỏ qua. Theo giả định chi phí, dương tính giả phát sinh công đọc, âm tính giả có thể mất cơ hội giữ khách. Recall cao có ý nghĩa nghiệp vụ nhưng cần kiểm soát Precision và số review phải đọc để tránh quá tải.
 
@@ -401,7 +434,7 @@ Markdown(d.to_markdown(index=False, floatfmt=".3f"))
 
 Trên vàng, PhoBERT có F1-macro 0,588 và Recall tiêu cực 0,850 ở Phụ kiện xe (33 câu), so với 0,804 và 1,000 ở Điện tử (26 câu). Cỡ mẫu nhỏ và cơ cấu nhãn khác nhau nên chưa chứng minh công bằng/bất công với nhóm người. Sách–văn phòng phẩm chỉ có 6 câu, không có nhãn tiêu cực: Recall ghi 0 theo quy ước zero_division, không phải bỏ sót toàn bộ lời chê. Ngành không có trong mẫu cũng chưa được đánh giá.
 
-Trong thí nghiệm LR ở notebook 07, khi bỏ dấu, F1-macro giảm từ 0,717 xuống 0,470 trên ViSD4SA test và từ 0,619 xuống 0,445 trên vàng. Thêm Aug vào train giúp F1 trên vàng không dấu lên 0,537, nhưng với ViSD4SA không dấu thì gần như không đổi (0,465). Vì Aug chưa rõ nguồn và tập vàng đã xem, các con số này chỉ mang tính thăm dò. Dữ liệu không có thông tin về tuổi, thiết bị hay nhóm xã hội, nên báo cáo không suy ra ai là người hay gõ không dấu. Muốn đánh giá đúng, cần văn bản không dấu có nguồn gốc rõ ràng và một mẫu đánh giá riêng.
+Trong thí nghiệm LR ở notebook 07, khi bỏ dấu, F1-macro giảm từ 0,720 xuống 0,472 trên ViSD4SA test và từ 0,619 xuống 0,447 trên vàng. Thêm Aug vào train giúp F1 trên vàng không dấu lên 0,537, nhưng với ViSD4SA không dấu thì gần như không đổi (0,465). Vì Aug chưa rõ nguồn và tập vàng đã xem, các con số này chỉ mang tính thăm dò. Dữ liệu không có thông tin về tuổi, thiết bị hay nhóm xã hội, nên báo cáo không suy ra ai là người hay gõ không dấu. Muốn đánh giá đúng, cần văn bản không dấu có nguồn gốc rõ ràng và một mẫu đánh giá riêng.
 
 Về quyền riêng tư, khi demo nên dùng văn bản đã xóa tên, số điện thoại, địa chỉ và thông tin giao dịch; mô hình phân loại cũng không cần thêm thông tin định danh nào. Tệp gốc và tệp kết quả cần được phân quyền truy cập, hạn chế lưu nội dung người dùng nhập và có quy trình xóa khi cần. Một review công khai trên sàn vẫn có thể chứa thông tin cá nhân. Với dữ liệu do AI hỗ trợ tạo hoặc gán nhãn, cần ghi rõ nguồn và người duyệt. Aug không thể thay cho nhãn thật, nhất là với lớp trung lập.
 
@@ -437,7 +470,7 @@ tbl("absa_eval.csv", encoding="utf-8-sig")
 
 ![Tỉ lệ tiêu cực theo ngành hàng × khía cạnh](../figures/absa_heatmap.png){#fig-absa-heat width=80%}
 
-Chạy trên toàn bộ dữ liệu Shopee đã làm sạch, hệ thống tìm thấy 1.501 lượt nhắc Chất lượng, trong đó 40,3% bị dự đoán là tiêu cực; Dịch vụ được nhắc 729 lượt nhưng tỷ lệ tiêu cực lên tới 52,5% (`aspect_summary.csv`). Hai con số này trả lời hai câu hỏi khác nhau: khía cạnh nào được nhắc nhiều thì cho biết khối lượng việc cần xử lý, còn khía cạnh nào có tỷ lệ chê cao thì cho biết vấn đề đang dồn vào đâu. Heatmap giúp khoanh vùng những chỗ nên đọc lại trước; những ô có ít lượt nhắc thì chưa đủ ổn định để xếp hạng. Cũng cần lưu ý thống kê này gồm cả review đã dùng để train và dựa trên nhãn dự đoán, nên không phải tỷ lệ hàng lỗi thật.
+Chạy trên toàn bộ dữ liệu Shopee đã làm sạch, hệ thống tìm thấy 1.501 lượt nhắc Chất lượng, trong đó 40,1% bị dự đoán là tiêu cực; Dịch vụ được nhắc 729 lượt nhưng tỷ lệ tiêu cực lên tới 52,5% (`aspect_summary.csv`). Hai con số này trả lời hai câu hỏi khác nhau: khía cạnh nào được nhắc nhiều thì cho biết khối lượng việc cần xử lý, còn khía cạnh nào có tỷ lệ chê cao thì cho biết vấn đề đang dồn vào đâu. Heatmap giúp khoanh vùng những chỗ nên đọc lại trước; những ô có ít lượt nhắc thì chưa đủ ổn định để xếp hạng. Cũng cần lưu ý thống kê này gồm cả review đã dùng để train và dựa trên nhãn dự đoán, nên không phải tỷ lệ hàng lỗi thật.
 
 # Sản phẩm mẫu, khả năng ứng dụng và hướng phát triển
 
@@ -455,7 +488,27 @@ Chạy trên toàn bộ dữ liệu Shopee đã làm sạch, hệ thống tìm t
 
 Một lượt dùng thử điển hình bắt đầu bằng review vừa khen giao hàng vừa chê chất lượng: nhập nội dung, xem app tách khía cạnh ra sao, đọc gợi ý xử lý rồi đối chiếu lại với review gốc. Sau đó thử một câu gõ không dấu và một câu của khách chưa dùng sản phẩm để cho thấy app còn yếu ở đâu. Việc đổi trả hay liên hệ khách chỉ được app gợi ý, không tự động thực hiện.
 
-PhoBERT chỉ xuất hiện trong các phân tích ngoại tuyến và trong phần tính chi phí của chiến lược ghép, thông qua xác suất đã lưu sẵn; review mới nhập vào app luôn chạy bằng LR. Vì vậy không thể dùng điểm của PhoBERT để nói về chất lượng dự đoán của dashboard. Ứng dụng chạy trực tuyến tại: [dán link Streamlit Cloud].
+PhoBERT chỉ xuất hiện trong các phân tích ngoại tuyến và trong phần tính chi phí của chiến lược ghép, thông qua xác suất đã lưu sẵn; review mới nhập vào app luôn chạy bằng LR. Vì vậy không thể dùng điểm của PhoBERT để nói về chất lượng dự đoán của dashboard. Ứng dụng chạy trực tuyến tại: <https://khoa-review-sentiment.streamlit.app/>.
+
+### Minh chứng giao diện và kiểm thử kỹ thuật
+
+Các hình dưới đây được chụp từ ứng dụng chạy cục bộ ngày 10/11/2026. Đây là minh chứng kiểm thử kỹ thuật, không phải khảo sát người dùng. Bản triển khai trên Streamlit Community Cloud được mở thử cùng ngày: phân tích một review, tab What-if và tab Tổng quan hiển thị không lỗi.
+
+![Phân tích review khen lẫn chê: nhãn tổng thể tiêu cực, đồng thời tách giao hàng tích cực khỏi chất lượng và dịch vụ tiêu cực](../figures/app_review.png){#fig-app-review width=90% fig-pos="tbp"}
+
+![Khuyến nghị theo khía cạnh và đóng góp tuyến tính của từ trong dự đoán LR](../figures/app_recommendations.png){#fig-app-recommendations width=90% fig-pos="tbp"}
+
+@fig-app-review và @fig-app-recommendations minh họa luồng từ nội dung khách viết đến khía cạnh và việc CSKH nên kiểm tra. Thanh đóng góp từ trong app biểu diễn hệ số nhân TF-IDF, không phải phép tính SHAP đầy đủ của phần phân tích ngoại tuyến. Khuyến nghị đổi trả hay liên hệ khách vẫn cần nhân viên xác minh.
+
+![What-if: sửa nội dung câu để quan sát thay đổi dự đoán](../figures/app_whatif.png){#fig-app-whatif width=90% fig-pos="tbp"}
+
+![What-if: thay ngưỡng cảnh báo và quan sát đánh đổi chi phí giả định trên tập vàng đã xem](../figures/app_cost.png){#fig-app-cost width=90% fig-pos="tbp"}
+
+@fig-app-whatif cho thấy mô hình đổi dự đoán khi thay nội dung. Tuy nhiên, một câu vừa khen vừa chê vẫn có thể bị gán tích cực. @fig-app-cost chỉ minh họa hoạt động của điều khiển ngưỡng và phép tính chi phí; ngưỡng đang hiển thị không phải ngưỡng được chọn để triển khai.
+
+![Tổng quan dữ liệu Shopee với bộ lọc ngành hàng, sản phẩm và các chỉ số dựa trên nhãn dự đoán](../figures/app_overview.png){#fig-app-overview width=90% fig-pos="tbp"}
+
+Trong kiểm thử trực tiếp, review không dấu “giao hang cham, hang bi vo nhung shop ho tro nhanh” bị gán tích cực và chỉ nhận diện khía cạnh dịch vụ tích cực. Đây là ví dụ app bỏ sót lời chê dù mức chắc chắn cao; không nên dùng nhãn “Tự động được” trên giao diện như bảo đảm dự đoán đúng hoặc cho phép tự động phản hồi khách. Kiểm thử kỹ thuật không thay thế đánh giá chất lượng trên tập độc lập.
 
 ## Ba vấn đề cần cải thiện
 
@@ -475,13 +528,13 @@ Ba vấn đề dưới đây được chọn theo số lượt bị dự đoán 
 
 ### Chất lượng hàng thời trang
 
-Có 150/279 lượt nhắc Chất lượng dự đoán tiêu cực (53,8%). Ví dụ: “đường may của balo bị lệch rất nhiều” (`shp_0985`); “Đã nhận, đường may bị méo, thất vọng” (`shp_0992`); “Chất lượng thì kém nịt vào kh hiểu sao nó bị kẹt cứng không tháo ra được” (`shp_0232`, trích đoạn).
+Có 149/279 lượt nhắc Chất lượng dự đoán tiêu cực (53,4%). Ví dụ: “đường may của balo bị lệch rất nhiều” (`shp_0985`); “Đã nhận, đường may bị méo, thất vọng” (`shp_0992`); “Chất lượng thì kém nịt vào kh hiểu sao nó bị kẹt cứng không tháo ra được” (`shp_0232`, trích đoạn).
 
-Shop nên có phiếu kiểm hàng riêng cho từng loại, tập trung vào đường may, khóa kéo, màu và mẫu, đồng thời ghi mã lô để khi có phản ánh có thể lần lại lô hàng. Khi khách báo lỗi, CSKH xin ảnh hoặc video rồi chuyển kho kiểm tra trước khi cho đổi trả. **KPI đề xuất:** tỷ lệ phản ánh chất lượng được xác nhận trên số review nhắc tới chất lượng, thời gian phản hồi khách và tỷ lệ đổi trả do lỗi. Tháng đầu dùng để đo mốc nền bằng kiểm tra tay, sau đó mới đặt mức giảm mục tiêu. Con số 53,8% ở trên là tỷ lệ dự đoán, không phải tỷ lệ hàng lỗi thật.
+Shop nên có phiếu kiểm hàng riêng cho từng loại, tập trung vào đường may, khóa kéo, màu và mẫu, đồng thời ghi mã lô để khi có phản ánh có thể lần lại lô hàng. Khi khách báo lỗi, CSKH xin ảnh hoặc video rồi chuyển kho kiểm tra trước khi cho đổi trả. **KPI đề xuất:** tỷ lệ phản ánh chất lượng được xác nhận trên số review nhắc tới chất lượng, thời gian phản hồi khách và tỷ lệ đổi trả do lỗi. Tháng đầu dùng để đo mốc nền bằng kiểm tra tay, sau đó mới đặt mức giảm mục tiêu. Con số 53,4% ở trên là tỷ lệ dự đoán, không phải tỷ lệ hàng lỗi thật.
 
 ### Độ bền và vật liệu sản phẩm thể thao
 
-Có 146/209 lượt nhắc Chất lượng dự đoán tiêu cực (69,9%). Ví dụ: “quá tệ đá tý đã bung chỉ” (`shp_1719`); “Chất lượng quá tệ! Mới bơm lên đã bung chỉ may, sắp nổ! Không đáng tiền” (`shp_1727`); “Vải quá mỏng ko giống với ảnh” (`shp_1601`, trích đoạn).
+Có 147/209 lượt nhắc Chất lượng dự đoán tiêu cực (70,3%). Ví dụ: “quá tệ đá tý đã bung chỉ” (`shp_1719`); “Chất lượng quá tệ! Mới bơm lên đã bung chỉ may, sắp nổ! Không đáng tiền” (`shp_1727`); “Vải quá mỏng ko giống với ảnh” (`shp_1601`, trích đoạn).
 
 Với hàng thể thao, nên kiểm tra độ bền đường may và vật liệu theo từng lô, đồng thời đăng thêm ảnh thật và ghi rõ độ dày vải cũng như cách sử dụng để khách không kỳ vọng sai. **KPI đề xuất:** tỷ lệ khiếu nại bung chỉ hoặc rách được xác nhận trên số review nhắc chất lượng, tỷ lệ lô hàng đạt kiểm tra và tỷ lệ đổi trả do độ bền. Khi so sánh trước và sau, cần giữ cùng danh mục hàng và cùng cách gán nhãn; nếu cơ cấu hàng thay đổi thì chưa thể kết luận biện pháp có hiệu quả.
 
@@ -511,7 +564,9 @@ Nếu làm tiếp, có thể mời 3–5 người dùng thử với các việc 
 
 **Dữ liệu và nhãn.** Dữ liệu Shopee chỉ gồm 32 sản phẩm, rất ít câu trung lập, và nhãn suy từ số sao khá nhiễu. Tập vàng có 300 câu gán cảm xúc và 200 câu gán khía cạnh, tất cả do một người gán, trong đó một số nhãn vẫn cần xem lại. Vì tập vàng đã được xem trong quá trình làm, mọi điểm số và phân tích trên đó chỉ mang tính thăm dò. Chia dữ liệu theo sản phẩm giúp giảm rò rỉ, nhưng không biến một tập đã xem thành tập test mù.
 
-**Mô hình và đánh giá.** Các mô hình tuyến tính vẫn còn khoảng cách lớn giữa train và validation. Word2Vec lấy trung bình nên mất thứ tự từ. PhoBERT bị giới hạn độ dài đầu vào, và nguồn train trên Colab chưa được xác minh đầy đủ. Mức F1-macro 0,779 trên ViSD4SA test không nói lên hiệu năng trên Shopee. Ngoài ra, cỡ mẫu theo từng ngành còn nhỏ, mức chắc chắn của mô hình chưa được hiệu chỉnh, và bootstrap theo câu có thể bỏ qua sự giống nhau giữa các review cùng sản phẩm.
+Đối chiếu bổ sung trước khi nộp (`submission_overlap_check.csv`) không thấy ID hoặc sản phẩm chung giữa Shopee train gán lại và kho vàng, nhưng phát hiện một chuỗi `text_prep` chung: câu train `shp_2194` và câu vàng `shp_2391` đều trở thành “giao hàng nhanh sản_phẩm chất_lượng” sau chuẩn hóa. Hai câu gốc dùng “sản phẩm” và “sp”, nên chỉ kiểm tra trùng văn bản gốc chưa loại được trường hợp này. Báo cáo giữ nguyên tập đánh giá và điểm đã công bố; đây là giới hạn kiểm soát trùng lặp cần xử lý từ trước khi khóa tập đánh giá cho phiên bản sau.
+
+**Mô hình và đánh giá.** Các mô hình tuyến tính vẫn còn khoảng cách lớn giữa train và validation. Word2Vec lấy trung bình nên mất thứ tự từ. PhoBERT bị giới hạn độ dài đầu vào, và nguồn train trên Colab chưa được xác minh đầy đủ. Ngày 10/11, toàn bộ notebook chạy cục bộ (trừ notebook 08 cần GPU) được chạy lại từ đầu bằng mã hiện tại. Luật chuẩn hóa viết tắt “bthg” → “bình thường” được thêm sau khi dữ liệu đã xử lý được tạo, nên lần chạy lại làm đổi `text_prep` của 2–4 câu mỗi tập; số liệu các mô hình cổ điển trong báo cáo là của lần chạy lại này. PhoBERT không được huấn luyện lại, nên vẫn dùng `text_prep` cũ ở vài câu đó; khác biệt này nhỏ nhưng có nghĩa là PhoBERT và các mô hình cổ điển không học trên đầu vào giống hệt nhau. Mức F1-macro 0,779 trên ViSD4SA test không nói lên hiệu năng trên Shopee. Ngoài ra, cỡ mẫu theo từng ngành còn nhỏ, mức chắc chắn của mô hình chưa được hiệu chỉnh, và bootstrap theo câu có thể bỏ qua sự giống nhau giữa các review cùng sản phẩm.
 
 **ABSA và ứng dụng.** Từ điển và luật vẫn bỏ sót hoặc gắn nhầm khía cạnh, và chưa xử lý tốt câu phủ định phức tạp, câu mỉa mai hay câu không dấu. Các thống kê kinh doanh dựa trên nhãn dự đoán và có lẫn dữ liệu train. App dùng LR cho review mới, trong khi một số phân tích ngoại tuyến lại dùng PhoBERT; chi phí trong báo cáo đều là mô phỏng. Đồ án cũng chưa có phản hồi từ người dùng thật.
 

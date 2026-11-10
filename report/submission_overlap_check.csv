@@ -1,0 +1,2 @@
+﻿train_id,gold_id,text_prep,shared_ids,shared_products,shared_text_prep,scope
+shp_2194,shp_2391,giao hàng nhanh sản_phẩm chất_lượng,0,0,1,Shopee train relabel versus gold pool; gold_id is in labeled gold

@@ -83,3 +83,35 @@ Mẫu:
 - Đề xuất: Claude đối chiếu số liệu, trích đoạn, nhóm lỗi và nhận xét; người dùng duyệt nội dung và cung cấp thông tin bìa. Hoàn thiện minh chứng app và render PDF ở việc 2. Không dùng việc hoàn tất bản thảo để duyệt kết quả thí nghiệm mới hoặc coi hồ sơ đã sẵn sàng nộp.
 - Kiểm tra harness cuối lượt: 28/34, exit code 1; các mục chưa đạt đã liệt kê ở trên.
 - Phản hồi của người kiểm tra: Chờ Claude kiểm tra.
+
+## R7 - chan Chốt hồ sơ nộp ngày 10/11/2026
+- Người ghi: Codex. Rà soát chỉ đọc, chạy harness; chỉ ghi thêm REVIEW.md theo phân vai.
+- Vị trí: `report/bao_cao.qmd`, `report/bao_cao.pdf`, `demo/README.md`, `notebook/08_phobert_colab.ipynb`, `harness/check.py`, `harness/TASKS.md`.
+- Tiêu chí rubric: PDF hướng dẫn 23/10, mục 1.2, 3.1, 4.2.5, 4.2.6 và checklist mục 5.
+- Vấn đề: harness hiện đạt 29/34, không phải điểm rubric. Thiếu link app trong demo và báo cáo, thiếu ảnh giao diện; PDF 24 trang có thời gian sửa trước QMD. Bìa PDF hiện bắt đầu bằng tiêu đề và mục lục, chưa có trang bìa đầy đủ theo mục 3.1; QMD đã có trường/khoa/họ tên/MSSV nhưng chưa có tên giảng viên hướng dẫn. Check bìa báo đạt chỉ do tìm từ "giảng viên" trong lời cảm ơn. Word cloud bị báo thiếu do check chuỗi Oranges: notebook thực tế tạo đủ neg/neu/pos bằng màu hex. Không tìm thấy ZIP tại thư mục gốc. Output notebook không có lỗi lưu nhưng chưa xác nhận Restart & Run All. Notebook 08 vẫn đọc shopee_train.csv/weak_label, chưa khớp đầu vào relabel của kết quả chính; không chạy lại hoặc giải nén đè kết quả PhoBERT khi chưa sửa và xác minh nguồn. R4-R6 còn nội dung chờ kiểm tra/duyệt; nhãn stt 108 vẫn được báo cáo là chưa xác nhận.
+- Đề xuất: (1) hoàn thiện bìa, bổ sung tên giảng viên, chuẩn Sentence case; (2) deploy app và kiểm thử review đơn, CSV, What-if, lọc và tải kết quả, ghi link thật và ảnh vào báo cáo; (3) Claude đối chiếu nội dung R6, nguồn dữ liệu notebook 08 và trạng thái notebook 06b, kiểm tra tái lập trong bản sao để không ghi đè bộ kết quả chính; người dùng xác nhận nhãn 108; (4) render PDF trực tiếp từ QMD cuối cùng và xem lại toàn bộ trang; (5) sửa kiểm tra word cloud/bìa đúng bản chất, chạy harness, đóng gói QMD/PDF/code/dữ liệu/demo theo mẫu Nhom_12_Project09_PhanTichCamXuc.zip, thử giải nén và chạy. Không cần mở thêm thí nghiệm để tăng điểm vàng; giữ phân biệt F1 ViSD4SA 0,779 với Shopee 0,704 thăm dò. App dùng LR, không gán điểm PhoBERT cho app.
+- Giới hạn: chưa thử app online, chưa chạy lại huấn luyện, chưa kiểm tra trực quan toàn bộ PDF, chưa đo Turnitin. Quy định <=20% có trong PDF nhưng không thể xác nhận bằng đọc văn bản. PDF cho phép link app HOẶC video; không yêu cầu làm cả hai. Dùng thử người thật là bonus, không phải chặn nộp.
+- Phản hồi của người làm: Chờ Claude xử lý và người dùng duyệt.
+
+
+## R8 - nen-sua Bàn giao kiểm tra và minh chứng ngày 10/11/2026 (việc 15)
+- Người ghi: Codex; người dùng đã giao đích danh ba phần kiểm tra notebook/số liệu, thử app và hoàn thiện bản thảo.
+- Vị trí: `demo/kiem_thu_2026-11-10.md`, `report/bao_cao.qmd`, `report/submission_metrics_check.csv`, `report/submission_overlap_check.csv`, `figures/app_*.png`.
+- Tiêu chí rubric: 4.2.2 (dữ liệu), 4.2.4 (đánh giá), 4.2.5 (demo), 4.2.6 (trình bày/tái lập).
+- Kết quả: 5 mô hình x 8 chỉ số khớp main_results.csv sau làm tròn; 21 ô bảng chạy được; 11 notebook không có lỗi trong output lưu, không đồng nghĩa Run All. Đã kiểm thử review đơn, What-if sửa câu/đổi ngưỡng và xem tổng quan trên Chrome; thêm 5 ảnh thật và giải thích vào báo cáo. Câu không dấu vẫn bị đoán tích cực sai về ý chê, đã nêu rõ.
+- Vấn đề mới: train shp_2194 và vàng shp_2391 trùng text_prep sau đổi sp thành sản phẩm; ID và sản phẩm không trùng. Bổ sung này không phủ nhận kiểm tra văn bản gốc của R5, nhưng cho thấy trùng lặp phụ thuộc cách chuẩn hóa. Giữ nguyên dữ liệu/điểm và ghi giới hạn. Model sklearn 1.9.0 đang nạp bằng 1.9.1 có cảnh báo, dù số tái tính khớp.
+- Giới hạn: công cụ không thao tác được hộp thoại upload; AppTest không trả kết quả và đã dừng. CSV tải/xuất và lọc ngành/sản phẩm chưa xác nhận. Notebook 08 vẫn cần đồng bộ đầu vào tái lập; 06b chưa xác nhận chạy lại. Không thay code notebook/app trong lượt này. Bìa thiếu tên giảng viên, link app chưa có; PDF chưa render theo phạm vi giao. Harness 30/34, lỗi kiểm tra word cloud và bìa như R7.
+- Đề xuất: Claude kiểm tra bản thảo và bảng đối chiếu; hoàn tất các trường hợp chưa xác nhận trong biên bản demo. Người dùng đã quyết định bỏ yêu cầu xác nhận nhãn 108: không dùng mục đó làm chặn nộp, giữ cách xử lý/giới hạn hiện có.
+- Phản hồi của người kiểm tra: Chờ Claude kiểm tra, người dùng duyệt.
+
+- Cập nhật R8 ngày 10/11: người dùng cung cấp tên giảng viên Trần Mạnh Tường; Codex đã điền vào phần Thông tin chung của QMD. Chưa render lại PDF; kiểm tra harness vẫn 30/34.
+
+## R9 - nen-sua Chạy lại toàn bộ notebook, kết quả đổi do luật `bthg` (việc 11)
+- Người ghi: Claude, 10/11/2026. Bàn giao để Codex kiểm tra.
+- Vị trí: `notebook/*.ipynb` (trừ 08 chỉ sửa mã), `data/processed/{shopee_train,visd_train,shopee_gold_pool,aug_train,shopee_predicted}.csv`, `models/*_AB*.joblib`, `report/*.csv`, `figures/*.png`, `report/bao_cao.qmd`.
+- Tiêu chí rubric: 4.2.6 (tái lập), 4.2.3–4.2.4 (số liệu mô hình).
+- Vấn đề: `src/preprocess.py` có luật teencode "bthg" → "bình thường" từ commit b7883d4 (02/11), nhưng dữ liệu đã xử lý được tạo ở 8d03f41 (28/10), nên số trong git không tái lập được bằng mã hiện tại. Chạy lại 01–07, 06b, 09, 10 (kernel mới, 0 lỗi): `text_prep` đổi 2 câu train Shopee, 4 câu ViSD train, 3 câu kho vàng, 2 câu Aug; nhãn/ID/văn bản gốc không đổi. Thay đổi chính: TF-IDF+LR vàng F1 0,605→0,612, Recall neg 0,826→0,835, ViSD 0,724→0,720, CI 0,555–0,670→0,562–0,675; TF-IDF+đặc trưng+LR ViSD 0,719→0,724; chi phí TF-IDF+LR 10,34→9,97 triệu/tháng; ABSA Acc cảm xúc Chất lượng 0,684→0,711; Word2Vec dev hòa 0,635 ở C=1 và C=10 (trước chọn C=0,1). PhoBERT, BoW+NB, CV, fairness, HITL không đổi.
+- Đã làm: người dùng chọn giữ kết quả mới. Sửa 10 chỗ số trong phần chữ báo cáo và 6 chỗ trong ô nhận xét notebook 07, 10; Word2Vec ghi chọn C=1 với quy tắc hòa lấy C nhỏ hơn; thêm hạn chế: PhoBERT không train lại nên vẫn dùng `text_prep` cũ ở vài câu. Đã kiểm tra lại: 9 review trích dẫn trong top 3 vấn đề vẫn bị đoán tiêu cực ở Chất lượng; hình SHAP cục bộ/tổng thể vẫn khớp phần chữ (P neg 0,08; “cũng”, “rẻ”). Notebook 08 đổi sang `shopee_train_relabel.csv` và ghi `train_file_B`, `n_train_B` vào `config.json`, không chạy lại. PDF render lại, harness 33/34.
+- Còn lại: model app đã đổi, cần commit + push để app online dùng model mới. `report/submission_metrics_check.csv` (R8) đối chiếu số cũ. Cảnh báo sklearn 1.9.0/1.9.1 hết vì model được lưu lại bằng 1.9.1.
+- Phản hồi của người kiểm tra: Chờ Codex kiểm tra.
+
