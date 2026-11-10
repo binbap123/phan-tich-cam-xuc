@@ -10,3 +10,16 @@ report/bao_cao.tex
 # file tạm của Quarto và bản nháp
 report/*.quarto_ipynb*
 tmp/
+
+# tài liệu nội bộ, giữ trên máy nhưng không đưa lên GitHub
+AGENTS.md
+CLAUDE.md
+HUONG_DAN_DO_AN.md
+harness/
+huong_dan_tieu_luan_va_rubric_cuoi_khoa*.pdf
+bao_cao_hoan_thien.html
+report/bao_cao_hoan_thien.html
+report/bao_cao_preview.qmd
+report/notes_du_lieu.md
+models/*_retrain/
+*.zip

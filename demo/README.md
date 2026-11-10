@@ -1,6 +1,6 @@
 # Minh chứng sản phẩm mẫu
 
-- **Ứng dụng online:** <https://khoa-review-sentiment.streamlit.app/> (Streamlit Community Cloud, nhánh `rubric-cuoi-khoa`, file `app/dashboard.py`). Đã mở thử ngày 10/11/2026: phân tích một review, tab What-if và tab Tổng quan chạy không lỗi.
+- **Ứng dụng online:** <https://khoa-review-sentiment.streamlit.app/> (Streamlit Community Cloud, nhánh `master`, file `app/dashboard.py`). Đã mở thử ngày 10/11/2026: phân tích một review, tab What-if và tab Tổng quan chạy không lỗi.
 
 ## Luồng thao tác gợi ý khi dùng thử
 
