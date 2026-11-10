@@ -150,17 +150,17 @@ def predict(texts):
 MAX_ROWS = 2000
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def read_upload(data: bytes):
     for enc in ("utf-8-sig", "cp1258"):
         try:
-            return pd.read_csv(io.BytesIO(data), encoding=enc)
+            return pd.read_csv(io.BytesIO(data), encoding=enc, nrows=MAX_ROWS + 1)
         except (UnicodeDecodeError, pd.errors.ParserError):
             continue
     return None
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def analyze_upload(data: bytes, text_col: str):
     """Chạy mô hình + ABSA trên file tải lên; trả về bảng cùng cột với shopee_predicted.csv."""
     raw = read_upload(data)
@@ -396,7 +396,7 @@ with tab3:
                 "Mặc định là 2.548 review Shopee của đồ án. Tải file CSV của shop lên để xem tổng quan trên dữ liệu đó.")
         up = st.file_uploader("Tải file CSV", type="csv", label_visibility="collapsed")
         st.caption(f"Cần một cột nội dung review (ưu tiên tên `text`). Có thể thêm cột `rating` (1–5 sao), "
-                   f"`category` (ngành hàng), `product` (sản phẩm) để lọc và so sánh. Tối đa {MAX_ROWS:,} dòng đầu tiên.")
+                   f"`category` (ngành hàng), `product` (sản phẩm) để lọc và so sánh. File tối đa 5 MB; chỉ lấy {MAX_ROWS:,} dòng đầu tiên.")
 
         uploaded = False
         df = load_predicted()
