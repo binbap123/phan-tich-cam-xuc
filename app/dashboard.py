@@ -2,6 +2,7 @@
 
 Chạy từ thư mục gốc dự án:  streamlit run app/dashboard.py
 """
+import io
 import sys
 from pathlib import Path
 
@@ -146,6 +147,40 @@ def predict(texts):
     return model.predict_proba(X), X
 
 
+MAX_ROWS = 2000
+
+
+@st.cache_data(show_spinner=False)
+def read_upload(data: bytes):
+    for enc in ("utf-8-sig", "cp1258"):
+        try:
+            return pd.read_csv(io.BytesIO(data), encoding=enc)
+        except (UnicodeDecodeError, pd.errors.ParserError):
+            continue
+    return None
+
+
+@st.cache_data(show_spinner=False)
+def analyze_upload(data: bytes, text_col: str):
+    """Chạy mô hình + ABSA trên file tải lên; trả về bảng cùng cột với shopee_predicted.csv."""
+    raw = read_upload(data)
+    raw = raw[raw[text_col].notna() & (raw[text_col].astype(str).str.strip() != "")].head(MAX_ROWS)
+    texts = raw[text_col].astype(str).tolist()
+    P, X = predict(texts)
+    df = pd.DataFrame({"text_clean": texts, "text_prep": X.text_prep.values,
+                       "pred": np.array(load_model().classes_)[P.argmax(1)],
+                       "p_neg": P[:, 0].round(3), "p_max": P.max(1)})
+    asp = [absa(t, load_model()) for t in texts]
+    for a in ASPECTS:
+        df[a] = [d.get(a, "none") for d in asp]
+    if "rating" in raw:
+        df["rating"] = pd.to_numeric(raw["rating"], errors="coerce").values
+    for c in ("category", "product"):
+        if c in raw:
+            df[c] = raw[c].astype(str).values
+    return df
+
+
 def word_contrib(x_prep, k, top=8):
     """SHAP của mô hình tuyến tính cho 1 câu: hệ số × (tf-idf − trung bình). Xem notebook 09."""
     model = load_model()
@@ -187,7 +222,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs(["🔎  Phân tích review", "🧪  What-if", "📊  Tổng quan Shopee"])
+tab1, tab2, tab3 = st.tabs(["🔎  Phân tích review", "🧪  What-if", "📊  Tổng quan"])
 
 # ---------------------------------------------------------------- Tab 1
 with tab1:
@@ -273,33 +308,8 @@ with tab1:
                         unsafe_allow_html=True)
 
     st.write("")
-    with st.expander("📂  Phân tích hàng loạt từ file CSV"):
-        st.markdown('<span class="muted">File cần có cột <code>text</code>; tối đa 2.000 dòng. '
-                    'Kết quả sắp xếp theo xác suất tiêu cực giảm dần.</span>', unsafe_allow_html=True)
-        up = st.file_uploader("CSV", type="csv", label_visibility="collapsed")
-        if up is not None:
-            df = pd.read_csv(up)
-            if "text" not in df:
-                st.error("File phải có cột `text`.")
-            else:
-                df = df.dropna(subset=["text"]).head(2000)
-                with st.spinner(f"Đang phân tích {len(df)} review…"):
-                    P, _ = predict(df.text.astype(str))
-                    df["cam_xuc"] = [LAB_VI[c] for c in np.array(load_model().classes_)[P.argmax(1)]]
-                    df["p_tieu_cuc"] = P[:, 0].round(3)
-                    df["can_nguoi_doc"] = P.max(1) < HITL_TAU
-                    asp = df.text.astype(str).map(lambda s: absa(s, load_model()))
-                    for a in ASPECTS:
-                        df[ASP_VI[a]] = asp.map(lambda d: LAB_VI.get(d.get(a), ""))
-                m1, m2, m3 = st.columns(3)
-                m1.markdown(card("Số review", f"{len(df):,}"), unsafe_allow_html=True)
-                m2.markdown(card("Tiêu cực", f"{(df.cam_xuc == 'Tiêu cực').mean():.0%}"), unsafe_allow_html=True)
-                m3.markdown(card("Cần người đọc", f"{df.can_nguoi_doc.sum():,}"), unsafe_allow_html=True)
-                st.write("")
-                st.dataframe(df.sort_values("p_tieu_cuc", ascending=False), width="stretch", hide_index=True,
-                             column_config={"p_tieu_cuc": st.column_config.ProgressColumn(
-                                 "P(tiêu cực)", min_value=0, max_value=1, format="%.2f")})
-                st.download_button("⬇️  Tải kết quả", df.to_csv(index=False).encode("utf-8-sig"), "ket_qua.csv", "text/csv")
+    st.markdown('<span class="muted">📂 Muốn phân tích nhiều review cùng lúc? Tải file CSV ở tab <b>Tổng quan</b>.</span>',
+                unsafe_allow_html=True)
 
 # ---------------------------------------------------------------- Tab 2
 with tab2:
@@ -381,24 +391,72 @@ with tab2:
 
 # ---------------------------------------------------------------- Tab 3
 with tab3:
-    df = load_predicted()
     with st.container(border=True):
-        c1, c2 = st.columns(2)
-        cats = c1.multiselect("Ngành hàng", sorted(df.category.dropna().unique()), placeholder="Tất cả ngành hàng")
-        if cats:
-            df = df[df.category.isin(cats)]
-        prods = c2.multiselect("Sản phẩm", sorted(df["product"].unique()), placeholder="Tất cả sản phẩm")
-        if prods:
-            df = df[df["product"].isin(prods)]
+        section("Nguồn dữ liệu",
+                "Mặc định là 2.548 review Shopee của đồ án. Tải file CSV của shop lên để xem tổng quan trên dữ liệu đó.")
+        up = st.file_uploader("Tải file CSV", type="csv", label_visibility="collapsed")
+        st.caption(f"Cần một cột nội dung review (ưu tiên tên `text`). Có thể thêm cột `rating` (1–5 sao), "
+                   f"`category` (ngành hàng), `product` (sản phẩm) để lọc và so sánh. Tối đa {MAX_ROWS:,} dòng đầu tiên.")
+
+        uploaded = False
+        df = load_predicted()
+        if up is not None:
+            raw = read_upload(up.getvalue())
+            text_cols = [] if raw is None else [c for c in raw.columns
+                                                     if not pd.api.types.is_numeric_dtype(raw[c])]
+            if not text_cols:
+                st.error("Không đọc được file hoặc file không có cột chữ nào. Hãy lưu file dạng CSV UTF-8.")
+            else:
+                text_col = "text" if "text" in text_cols else st.selectbox(
+                    "Cột chứa nội dung review", text_cols, help="File không có cột `text`, hãy chọn cột chứa review.")
+                with st.spinner("Đang phân tích review trong file…"):
+                    res = analyze_upload(up.getvalue(), text_col)
+                if len(res):
+                    df, uploaded = res, True
+                    st.success(f"Đang hiển thị {len(df):,} review từ **{up.name}**"
+                               + (f" (chỉ lấy {MAX_ROWS:,} dòng đầu)" if len(raw) > MAX_ROWS else "") + ".")
+                else:
+                    st.error(f"Cột `{text_col}` không có review nào.")
+
+        has_rating = "rating" in df and df.rating.notna().any()
+        filters = [c for c in ("category", "product") if c in df]
+        if filters:
+            cols = st.columns(len(filters))
+            if "category" in filters:
+                cats = cols[0].multiselect("Ngành hàng", sorted(df.category.dropna().unique()),
+                                           placeholder="Tất cả ngành hàng")
+                if cats:
+                    df = df[df.category.isin(cats)]
+            if "product" in filters:
+                prods = cols[-1].multiselect("Sản phẩm", sorted(df["product"].dropna().unique()),
+                                             placeholder="Tất cả sản phẩm")
+                if prods:
+                    df = df[df["product"].isin(prods)]
 
     st.write("")
     m1, m2, m3, m4 = st.columns(4)
-    m1.markdown(card("Số review", f"{len(df):,}", f"{df['product'].nunique()} sản phẩm"), unsafe_allow_html=True)
-    m2.markdown(card("Tỉ lệ tiêu cực", f"{(df.pred == 'neg').mean():.1%}", "theo dự đoán của mô hình"), unsafe_allow_html=True)
-    m3.markdown(card("Sao trung bình", f"{df.rating.mean():.2f} ★", "trên thang 5"), unsafe_allow_html=True)
-    m4.markdown(card("Review 4–5 sao bị đoán chê", f"{((df.rating >= 4) & (df.pred == 'neg')).sum():,}",
-                     "lời chê dễ bị bỏ sót nếu chỉ lọc theo sao"), unsafe_allow_html=True)
+    m1.markdown(card("Số review", f"{len(df):,}",
+                     f"{df['product'].nunique()} sản phẩm" if "product" in df else (up.name if uploaded else "")),
+                unsafe_allow_html=True)
+    m2.markdown(card("Tỉ lệ tiêu cực", f"{(df.pred == 'neg').mean():.1%}" if len(df) else "–",
+                     "theo dự đoán của mô hình"), unsafe_allow_html=True)
+    if has_rating:
+        m3.markdown(card("Sao trung bình", f"{df.rating.mean():.2f} ★", "trên thang 5"), unsafe_allow_html=True)
+        m4.markdown(card("Review 4–5 sao bị đoán chê", f"{((df.rating >= 4) & (df.pred == 'neg')).sum():,}",
+                         "lời chê dễ bị bỏ sót nếu chỉ lọc theo sao"), unsafe_allow_html=True)
+    else:
+        neg_asp = {ASP_VI[a]: int((df[a] == "neg").sum()) for a in ASPECTS}
+        worst = max(neg_asp, key=neg_asp.get)
+        m3.markdown(card("Cần người đọc", f"{(df.p_max < HITL_TAU).sum():,}",
+                         f"xác suất cao nhất &lt; {HITL_TAU:.0%}"), unsafe_allow_html=True)
+        m4.markdown(card("Khía cạnh bị chê nhiều nhất", worst if neg_asp[worst] else "–",
+                         f"{neg_asp[worst]:,} lượt chê" if neg_asp[worst] else "chưa có lượt chê"),
+                    unsafe_allow_html=True)
     st.write("")
+
+    if not len(df):
+        st.info("Nhóm đang chọn không có review nào.")
+        st.stop()
 
     c1, c2 = st.columns([2, 3], gap="large")
     with c1, st.container(border=True):
@@ -412,20 +470,25 @@ with tab3:
         section("Cảm xúc theo khía cạnh")
         long = df.melt(value_vars=ASPECTS, var_name="Khía cạnh", value_name="Cảm xúc")
         long = long[long["Cảm xúc"] != "none"]
-        long["Khía cạnh"] = long["Khía cạnh"].map(ASP_VI)
-        long["Cảm xúc"] = long["Cảm xúc"].map(LAB_VI)
-        agg = long.value_counts(["Khía cạnh", "Cảm xúc"]).reset_index()
-        fig = px.bar(agg, y="Khía cạnh", x="count", color="Cảm xúc", color_discrete_map=COLORS, orientation="h",
-                     labels={"count": "Số lượt nhắc", "Khía cạnh": ""},
-                     category_orders={"Cảm xúc": ["Tiêu cực", "Trung lập", "Tích cực"]})
-        fig.update_layout(legend=dict(orientation="h", y=-0.25, x=0.5, xanchor="center"))
-        st.plotly_chart(style_fig(fig, 320), width="stretch", config={"displayModeBar": False})
+        if len(long):
+            long["Khía cạnh"] = long["Khía cạnh"].map(ASP_VI)
+            long["Cảm xúc"] = long["Cảm xúc"].map(LAB_VI)
+            agg = long.value_counts(["Khía cạnh", "Cảm xúc"]).reset_index()
+            fig = px.bar(agg, y="Khía cạnh", x="count", color="Cảm xúc", color_discrete_map=COLORS, orientation="h",
+                         labels={"count": "Số lượt nhắc", "Khía cạnh": ""},
+                         category_orders={"Cảm xúc": ["Tiêu cực", "Trung lập", "Tích cực"]})
+            fig.update_layout(legend=dict(orientation="h", y=-0.25, x=0.5, xanchor="center"))
+            st.plotly_chart(style_fig(fig, 320), width="stretch", config={"displayModeBar": False})
+        else:
+            st.markdown('<span class="muted">Không tìm thấy khía cạnh nào trong từ điển.</span>',
+                        unsafe_allow_html=True)
 
     st.write("")
     with st.container(border=True):
         section("Top từ khóa trong review mô hình dự đoán tiêu cực",
                 "Số review chê có chứa từ; di chuột để xem tỉ lệ chê. Từ khóa giúp tìm review, không thay việc đọc.")
-        kw = top_negative_keywords(df)
+        # File nhỏ: hạ số review tối thiểu để vẫn có từ khóa (mặc định 5 như notebook 10)
+        kw = top_negative_keywords(df, min_docs=int(np.clip((df.pred == "neg").sum() // 20, 2, 5)))
         if len(kw):
             fig = px.bar(kw.iloc[::-1], x="Số review chê", y="Từ khóa", orientation="h",
                          hover_data=["Tỉ lệ chê"], color_discrete_sequence=[COLORS["Tiêu cực"]])
@@ -438,10 +501,21 @@ with tab3:
     st.write("")
     with st.container(border=True):
         section("Review tiêu cực nổi bật", "50 review có xác suất tiêu cực cao nhất trong nhóm đang chọn.")
-        top = df[df.pred == "neg"].sort_values("p_neg", ascending=False)[["category", "rating", "p_neg", "text_clean"] + ASPECTS].head(50)
+        meta = [c for c in ("category", "rating") if c in df]
+        top = df[df.pred == "neg"].sort_values("p_neg", ascending=False)[meta + ["p_neg", "text_clean"] + ASPECTS].head(50)
         for a in ASPECTS:
             top[a] = top[a].map(lambda s: LAB_VI.get(s, ""))
         top = top.rename(columns={"category": "Ngành", "rating": "Sao", "text_clean": "Nội dung", **ASP_VI})
         st.dataframe(top, hide_index=True, width="stretch",
-                     column_config={"p_neg": st.column_config.ProgressColumn("P(tiêu cực)", min_value=0, max_value=1, format="%.2f"),
+                     column_config={"p_neg": st.column_config.ProgressColumn("P(tiêu cực)", min_value=0, max_value=1,
+                                                                             format="%.2f"),
                                     "Nội dung": st.column_config.TextColumn(width="large")})
+
+    if uploaded:
+        out = df.assign(cam_xuc=df.pred.map(LAB_VI), can_nguoi_doc=df.p_max < HITL_TAU,
+                        **{ASP_VI[a]: df[a].map(lambda s: LAB_VI.get(s, "")) for a in ASPECTS})
+        out = (out.drop(columns=["text_prep", "pred", "p_max"] + ASPECTS)
+                  .rename(columns={"text_clean": "noi_dung", "p_neg": "p_tieu_cuc"})
+                  .sort_values("p_tieu_cuc", ascending=False))
+        st.download_button("⬇️  Tải kết quả phân tích (CSV)", out.to_csv(index=False).encode("utf-8-sig"),
+                           "ket_qua_phan_tich.csv", "text/csv")

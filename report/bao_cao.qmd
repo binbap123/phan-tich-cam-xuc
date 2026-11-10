@@ -480,9 +480,9 @@ Chạy trên toàn bộ dữ liệu Shopee đã làm sạch, hệ thống tìm t
 
 | Tab | Tác vụ | Ý nghĩa |
 |---|---|---|
-| Phân tích review | Nhập review/tải CSV; xem và tải kết quả | CSKH đọc nhãn, khía cạnh, nội dung gốc và gợi ý xử lý. |
+| Phân tích review | Nhập một review; xem nhãn, khía cạnh, từ ảnh hưởng và khuyến nghị | CSKH đọc nhãn, khía cạnh, nội dung gốc và gợi ý xử lý. |
 | What-if | Sửa câu, thử không dấu; thay giả định chi phí/ngưỡng | Giải thích hành vi và đánh đổi; kết quả vàng chỉ thăm dò. |
-| Tổng quan Shopee | Lọc ngành, xem cảm xúc, khía cạnh, top từ khóa dự đoán tiêu cực | Chọn vấn đề để đọc lại, phân công xử lý. |
+| Tổng quan | Mặc định là dữ liệu Shopee; tải CSV của shop để phân tích hàng loạt; lọc ngành/sản phẩm nếu file có; xem cảm xúc, khía cạnh, top từ khóa dự đoán tiêu cực; tải kết quả | Chọn vấn đề để đọc lại, phân công xử lý. |
 
 : Chức năng ứng dụng mẫu {#tbl-app}
 
@@ -492,7 +492,7 @@ PhoBERT chỉ xuất hiện trong các phân tích ngoại tuyến và trong ph�
 
 ### Minh chứng giao diện và kiểm thử kỹ thuật
 
-Các hình dưới đây được chụp từ ứng dụng chạy cục bộ ngày 10/11/2026. Đây là minh chứng kiểm thử kỹ thuật, không phải khảo sát người dùng. Bản triển khai trên Streamlit Community Cloud được mở thử cùng ngày: phân tích một review, tab What-if và tab Tổng quan hiển thị không lỗi.
+Các hình dưới đây được chụp từ ứng dụng chạy cục bộ ngày 10/11/2026. Đây là minh chứng kiểm thử kỹ thuật, không phải khảo sát người dùng. Bản triển khai trên Streamlit Community Cloud được mở thử cùng ngày: phân tích một review, tab What-if và tab Tổng quan hiển thị không lỗi. Sau khi chụp, tab “Tổng quan Shopee” được đổi tên thành “Tổng quan” và nhận thêm file CSV tải lên: khi có file, mọi chỉ số, biểu đồ và bảng của tab được tính trên file đó thay cho dữ liệu Shopee, kèm nút tải kết quả. Tính năng này được thử cục bộ với một file có cột `text`, `rating`, `category` và một file chỉ có cột nội dung tên khác; hình minh họa bên dưới vẫn là giao diện trước khi đổi.
 
 ![Phân tích review khen lẫn chê: nhãn tổng thể tiêu cực, đồng thời tách giao hàng tích cực khỏi chất lượng và dịch vụ tiêu cực](../figures/app_review.png){#fig-app-review width=90% fig-pos="tbp"}
 
